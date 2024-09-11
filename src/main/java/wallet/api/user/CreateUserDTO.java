@@ -1,4 +1,16 @@
 package wallet.api.user;
 
-public record CreateUserDTO(String name, String email, String password) {
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+
+
+public record CreateUserDTO(
+        @NotBlank
+        @NotEmpty
+        String name,
+        @Email
+        String email,
+        @NotBlank
+        String password) {
 }
