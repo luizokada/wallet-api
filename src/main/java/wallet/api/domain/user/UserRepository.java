@@ -1,6 +1,7 @@
-package wallet.api.user;
+package wallet.api.domain.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import wallet.api.domain.user.entity.User;
 
 import java.util.List;
 

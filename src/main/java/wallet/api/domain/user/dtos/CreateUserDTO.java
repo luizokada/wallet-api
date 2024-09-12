@@ -1,4 +1,4 @@
-package wallet.api.user;
+package wallet.api.domain.user.dtos;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

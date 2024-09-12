@@ -1,4 +1,6 @@
-package wallet.api.user;
+package wallet.api.domain.user.dtos;
+
+import wallet.api.domain.user.entity.User;
 
 import java.util.List;
 

@@ -1,7 +1,5 @@
-package wallet.api.user;
+package wallet.api.domain.user.dtos;
 
-
-import java.util.List;
 
 public record UpdateUserDTO(
         String name) {
