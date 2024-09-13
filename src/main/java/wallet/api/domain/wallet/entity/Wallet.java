@@ -1,4 +1,4 @@
-package wallet.api.domain.wallet;
+package wallet.api.domain.wallet.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -6,8 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.math.BigInteger;
-import java.util.Date;
+import java.util.UUID;
 
 @Table(name = "wallets")
 @Entity(name = "walet")
@@ -21,4 +20,9 @@ public class Wallet {
     private String id;
     @Column(name = "user_id")
     private String userId;
+
+    public Wallet(String userId) {
+
+        this.userId = userId;
+    }
 }
