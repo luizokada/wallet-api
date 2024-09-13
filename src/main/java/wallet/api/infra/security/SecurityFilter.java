@@ -4,10 +4,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.aspectj.weaver.ast.Not;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -30,9 +29,8 @@ public class SecurityFilter extends OncePerRequestFilter {
     }
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        System.out.println("ALOOO");
         try {
-
-
             var token = this.getHeaderToken(request);
 
 
@@ -42,10 +40,12 @@ public class SecurityFilter extends OncePerRequestFilter {
             var decodedSubject = tokenService.getDecodedToken(token);
             var user = authRepository.findByEmail(decodedSubject);
             var authorise = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+
             SecurityContextHolder.getContext().setAuthentication(authorise);
 
             filterChain.doFilter(request,response);
         }catch (RuntimeException e){
+
             handleErorInFilter(request,response,e);
 
 
@@ -89,5 +89,11 @@ public class SecurityFilter extends OncePerRequestFilter {
         response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         response.getWriter().write(getErrorResponse("", path, "500", "Bad Request"));
 
+    }
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        var isLogin = request.getServletPath().equals("/login");
+        var isCreateuser = request.getServletPath().equals("/user/create-user") && request.getMethod().equals("POST");
+        return isLogin||isCreateuser;
     }
 }
