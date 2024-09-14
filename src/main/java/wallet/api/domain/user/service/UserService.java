@@ -5,7 +5,6 @@ import wallet.api.domain.user.dtos.CreateUserDTO;
 import wallet.api.domain.user.dtos.UpdateUserDTO;
 import wallet.api.domain.user.entity.User;
 import wallet.api.domain.user.repository.UserRepository;
-import wallet.api.domain.wallet.entity.Wallet;
 import wallet.api.errors.user.UserEmailError;
 import wallet.api.errors.user.UserNotFound;
 

@@ -1,7 +1,7 @@
-CREATE TABLE IF NOT EXISTS Expense (
+CREATE TABLE IF NOT EXISTS Expenses (
     id varChar(255) PRIMARY KEY,
     amount BIGINT NOT NULL,
-    description TEXT NOT NULL,
+    description TEXT,
     category_id varChar(255),
     wallet_id varChar(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

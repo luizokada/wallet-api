@@ -1,6 +1,5 @@
 package wallet.api.domain.expenseCategory.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import wallet.api.domain.expenseCategory.dtos.ExpenseCateogryBodyDTO;
 import wallet.api.domain.expenseCategory.dtos.UpdateExpenseCategoryDTO;

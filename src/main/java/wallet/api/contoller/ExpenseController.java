@@ -31,8 +31,8 @@ public class ExpenseController {
         var uri = uribuild.path("/expense/{id}").buildAndExpand(createdExpense.getId()).toUri();
 
         ExpenseCateogryToApiVIewDTO categoryJson = null;
-        if(createdExpense.getExpense_cateogories() != null) {
-            categoryJson = new ExpenseCateogryToApiVIewDTO(createdExpense.getExpense_cateogories());
+        if(createdExpense.getCategory() != null) {
+            categoryJson = new ExpenseCateogryToApiVIewDTO(createdExpense.getCategory());
         }
         var jsonToReturn = new ExpenseToApiViewDto(createdExpense,categoryJson );
 

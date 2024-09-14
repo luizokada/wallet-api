@@ -1,7 +1,6 @@
 package wallet.api.contoller;
 
 import jakarta.validation.Valid;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,10 +10,7 @@ import wallet.api.domain.user.dtos.CreateUserDTO;
 import wallet.api.domain.user.dtos.UpdateUserDTO;
 import wallet.api.domain.user.dtos.UserToApiViewDTO;
 import wallet.api.domain.user.entity.User;
-import wallet.api.domain.user.repository.UserRepository;
 import wallet.api.domain.user.service.UserService;
-import wallet.api.errors.user.UserEmailError;
-import wallet.api.errors.user.UserNotFound;
 
 import java.util.List;
 

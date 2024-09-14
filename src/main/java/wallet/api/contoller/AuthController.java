@@ -1,11 +1,9 @@
 package wallet.api.contoller;
 
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,11 +16,15 @@ import wallet.api.infra.jwt.JWTService;
 @RestController
 @RequestMapping("/login")
 public class AuthController {
-    @Autowired
-    private AuthenticationManager manager;
 
-    @Autowired
-    private JWTService tokenService;
+    private final AuthenticationManager manager;
+
+    private final JWTService tokenService;
+
+    public AuthController(AuthenticationManager manager, JWTService tokenService) {
+        this.manager = manager;
+        this.tokenService = tokenService;
+    }
 
 
     @PostMapping
