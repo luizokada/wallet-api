@@ -22,7 +22,7 @@ public class WalletController {
 
     @PostMapping
     public ResponseEntity<Object> createWallet(@AuthenticationPrincipal User user, UriComponentsBuilder uriComponentsBuilder) {
-        var createWallet = walletService.createWallet(user.getId());
+        var createWallet = walletService.createWallet(user);
         var uri = uriComponentsBuilder.path("/wallet/{id}").buildAndExpand(createWallet.getId()).toUri();
         return ResponseEntity.created(uri).build();
     }

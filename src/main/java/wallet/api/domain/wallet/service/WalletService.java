@@ -1,6 +1,7 @@
 package wallet.api.domain.wallet.service;
 
 import org.springframework.stereotype.Service;
+import wallet.api.domain.user.entity.User;
 import wallet.api.domain.wallet.entity.Wallet;
 import wallet.api.domain.wallet.repository.WalletRepository;
 import wallet.api.errors.wallet.UserAlreadyHasWallet;
@@ -15,15 +16,15 @@ public class WalletService {
         this.walletRepository = walletRepository;
     }
 
-    public Wallet createWallet(String userId) {
+    public Wallet createWallet(User user) {
 
-        var foundWallet = walletRepository.findByUserId(userId);
+        var foundWallet = walletRepository.findByUserId(user.getId());
 
         if(foundWallet != null) {
             throw new UserAlreadyHasWallet();
         }
 
-        var wallet = new Wallet(userId);
+        var wallet = new Wallet(user);
 
         return walletRepository.save(wallet);
     }
