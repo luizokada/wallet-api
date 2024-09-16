@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import wallet.api.domain.expense.dto.CreateExpenseDTO;
+import wallet.api.domain.expense.dto.UpdateExpenseDTO;
 import wallet.api.domain.expenseCategory.entity.ExpenseCategory;
 import wallet.api.domain.wallet.entity.Wallet;
 
@@ -58,6 +59,21 @@ public class Expense {
         }
 
 
+    }
+
+    public void update(UpdateExpenseDTO payload, ExpenseCategory expenseCategory){
+        if(payload.amount()!=null){
+            this.amount = payload.amount();
+        }
+        if(payload.description()!=null){
+            this.description = payload.description();
+        }
+        if(payload.expenseDate()!=null){
+            this.expense_date = payload.expenseDate();
+        }
+        if(payload.categoryId()!=null){
+            this.category = expenseCategory;
+        }
     }
 
 

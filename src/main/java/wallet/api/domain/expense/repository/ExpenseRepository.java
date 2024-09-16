@@ -14,4 +14,6 @@ public interface ExpenseRepository extends JpaRepository<Expense,String> {
     @Query(value = "SELECT ec FROM expenseCategory ec WHERE ec.id = ?1")
     ExpenseCategory findExpenseCategoryById(String id);
 
+    Expense findExpenseById(String id);
+
 }
