@@ -76,5 +76,15 @@ public class Expense {
         }
     }
 
+    public void toStr(){
+        System.out.println("Expense: "+this.id);
+        System.out.println("Amount: "+this.amount);
+        System.out.println("Description: "+this.description);
+        System.out.println("Category: "+this.categoryId);
+        System.out.println("Wallet: "+this.walletId);
+        System.out.println("Created At: "+this.createdAt);
+        System.out.println("Expense Date: "+this.expense_date);
+    }
+
 
 }

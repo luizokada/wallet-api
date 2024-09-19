@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import wallet.api.domain.expense.entity.Expense;
 import wallet.api.domain.user.entity.User;
+import wallet.api.domain.wallet.dto.UpdateWalletDTO;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,6 +25,9 @@ public class Wallet {
     @Column(name = "user_id",insertable=false, updatable=false)
     private String userId;
 
+    @Column(name = "balance")
+    private Integer balance;
+
     @OneToMany(mappedBy = "wallet",  cascade={ CascadeType.PERSIST, CascadeType.MERGE }, orphanRemoval = true)
     private Set<Expense> expenses  = new HashSet<>();
 
@@ -35,5 +39,11 @@ public class Wallet {
     public Wallet(User user) {
 
         this.user = user;
+    }
+
+    public void update(UpdateWalletDTO payload) {
+        if(payload.balance()!=null) {
+            this.balance = payload.balance();
+        }
     }
 }

@@ -93,4 +93,11 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return UserDetails.super.isEnabled();
     }
+
+    public String getWalletId(){
+        if(this.wallet == null){
+            return null;
+        }
+        return this.wallet.getId();
+    }
 }
