@@ -33,7 +33,7 @@ public class UserService {
         User user = new User(userPayload);
 
         User founduser = userRepository.findByEmail(user.getEmail());
-        if(founduser!=null){
+        if (founduser != null) {
             throw new UserEmailError();
         }
         var createdUser =  userRepository.save(user);

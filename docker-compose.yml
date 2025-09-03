@@ -1,6 +1,5 @@
-# Note that this file is not used in production. It is only used for local development. With
-# this in mind, the hosts for elastic and postgres are set to the service names in the docker-compose
-# because of the bridge network. You can also comment any services that you don't need for local
+# Docker Compose para Wallet API
+# Inclui banco de dados PostgreSQL e a aplicação Spring Boot
 
 version: "3.9"
 services:
@@ -17,14 +16,7 @@ services:
       PG_DATA: /var/lib/postgresql/data
     healthcheck:
       test:
-        [
-          "CMD",
-          "pg_isready",
-          "-U",
-          "${POSTGRES_USER}",
-          "-d",
-          "${POSTGRES_DB}"
-        ]
+        ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
       interval: 10s
       timeout: 10s
       retries: 5
@@ -33,13 +25,45 @@ services:
       - "-c"
       - "wal_level=logical"
     ports:
-      - 5432:5432
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  wallet-api:
+    container_name: wallet_api
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - wallet_network
+    environment:
+      # Configurações do banco (usando nome do serviço como host)
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+      # Configurações JWT
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+
+      # Configurações Spring
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
 
 networks:
   wallet_network:
     driver: bridge
 volumes:
   pgdata:
-

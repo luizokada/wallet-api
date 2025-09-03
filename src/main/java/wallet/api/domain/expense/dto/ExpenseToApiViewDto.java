@@ -1,12 +1,9 @@
 package wallet.api.domain.expense.dto;
 
+import java.util.List;
+
 import wallet.api.domain.expense.entity.Expense;
 import wallet.api.domain.expenseCategory.dtos.ExpenseCateogryToApiVIewDTO;
-
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public record ExpenseToApiViewDto(
         String id,
@@ -14,9 +11,6 @@ public record ExpenseToApiViewDto(
         int amount,
         String expenseAt,
         ExpenseCateogryToApiVIewDTO expenseCategory
-
-
-
 ) {
 
     public static List<ExpenseToApiViewDto> fromList(List<Expense> expenses){
@@ -30,9 +24,8 @@ public record ExpenseToApiViewDto(
 
     }
 
-
     public ExpenseToApiViewDto(Expense expense, ExpenseCateogryToApiVIewDTO expenseCategory){
 
-        this(expense.getId(), expense.getDescription(), expense.getAmount(), expense.getExpense_date().toGMTString(), expenseCategory);
+        this(expense.getId(), expense.getDescription(), expense.getAmount(), expense.getExpense_date().toString(), expenseCategory);
     }
 }

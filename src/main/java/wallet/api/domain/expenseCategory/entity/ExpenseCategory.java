@@ -1,17 +1,23 @@
 package wallet.api.domain.expenseCategory.entity;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import wallet.api.domain.expense.entity.Expense;
 import wallet.api.domain.expenseCategory.dtos.ExpenseCateogryBodyDTO;
 import wallet.api.domain.expenseCategory.dtos.UpdateExpenseCategoryDTO;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Table(name="expense_categories")
 @Entity(name="expenseCategory")

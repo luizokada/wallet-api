@@ -1,5 +1,6 @@
 package wallet.api.contoller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("expense-category")
+@Tag(
+        name = "Expense Category",
+        description = "Endpoints for managing expense categories"
+)
 public class ExpenseCategoyController {
 
     private final ExpenseCategoryService expenseCategoryService;

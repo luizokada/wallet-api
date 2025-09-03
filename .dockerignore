@@ -1,0 +1,35 @@
+
+# Arquivos de IDE
+.idea/
+.vscode/
+*.iml
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Documentação
+README.md
+HELP.md
+
+# Arquivos de backup
+*.bak
+*.backup
+# Zone Identifier (Windows)
+*.Zone.Identifier

@@ -4,20 +4,27 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import wallet.api.domain.auth.AuthRepository;
 import wallet.api.errors.auth.NoTokenError;
 import wallet.api.infra.jwt.JWTService;
+import wallet.api.infra.security.annotations.PublicRoute;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Objects;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
+    @Autowired
+    private RequestMappingHandlerMapping reqMap;
 
     private final JWTService tokenService;
     private final AuthRepository authRepository;
@@ -30,8 +37,6 @@ public class SecurityFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
             var token = this.getHeaderToken(request);
-
-
             if(token.isEmpty()){
                 throw new NoTokenError();
             }
@@ -43,10 +48,7 @@ public class SecurityFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request,response);
         }catch (RuntimeException e){
-
             handleErorInFilter(request,response,e);
-
-
         }
 
     }
@@ -90,8 +92,18 @@ public class SecurityFilter extends OncePerRequestFilter {
     }
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        var isLogin = request.getServletPath().equals("/login");
-        var isCreateuser = request.getServletPath().equals("/user/create-user") && request.getMethod().equals("POST");
-        return isLogin||isCreateuser;
+        HandlerMethod method = null;
+        var isSwagger = request.getServletPath().startsWith("/swagger-ui") || request.getServletPath().startsWith("/v3/api-docs");
+
+        if(isSwagger){
+            return true;
+        }
+        try {
+            method = (HandlerMethod) Objects.requireNonNull(reqMap.getHandler(request)).getHandler();
+        } catch (Exception e) {
+            return true;
+        }
+        return method.getMethod().isAnnotationPresent(PublicRoute.class);
     }
+
 }

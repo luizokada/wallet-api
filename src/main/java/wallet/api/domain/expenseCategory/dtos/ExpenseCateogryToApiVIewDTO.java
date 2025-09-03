@@ -1,10 +1,8 @@
 package wallet.api.domain.expenseCategory.dtos;
 
-import wallet.api.domain.expenseCategory.entity.ExpenseCategory;
-import wallet.api.domain.user.dtos.UserToApiViewDTO;
-import wallet.api.domain.user.entity.User;
-
 import java.util.List;
+
+import wallet.api.domain.expenseCategory.entity.ExpenseCategory;
 
 public record ExpenseCateogryToApiVIewDTO(
         String id,

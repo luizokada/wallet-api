@@ -39,6 +39,7 @@ public class Wallet {
     public Wallet(User user) {
 
         this.user = user;
+        this.balance = 0;
     }
 
     public void update(UpdateWalletDTO payload) {

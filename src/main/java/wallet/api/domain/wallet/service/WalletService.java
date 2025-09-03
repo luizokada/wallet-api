@@ -1,7 +1,7 @@
 package wallet.api.domain.wallet.service;
 
 import org.springframework.stereotype.Service;
-import wallet.api.domain.expense.dto.ExpenseToApiViewDto;
+
 import wallet.api.domain.user.entity.User;
 import wallet.api.domain.wallet.dto.GetWalletDTO;
 import wallet.api.domain.wallet.dto.UpdateWalletDTO;

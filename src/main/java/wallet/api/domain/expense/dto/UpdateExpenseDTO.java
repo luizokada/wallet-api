@@ -1,10 +1,10 @@
 package wallet.api.domain.expense.dto;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import java.util.Date;
+
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.util.Date;
+import jakarta.validation.constraints.Positive;
 
 public record UpdateExpenseDTO(
         @DateTimeFormat

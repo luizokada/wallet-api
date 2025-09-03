@@ -1,5 +1,6 @@
 package wallet.api.contoller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,9 +13,14 @@ import wallet.api.domain.auth.AuthTOAPIView;
 import wallet.api.domain.auth.LoginAuthDTO;
 import wallet.api.domain.user.entity.User;
 import wallet.api.infra.jwt.JWTService;
+import wallet.api.infra.security.annotations.PublicRoute;
 
 @RestController
 @RequestMapping("/login")
+@Tag(
+        name = "Authentication",
+        description = "Endpoints for user authentication and JWT token generation"
+)
 public class AuthController {
 
     private final AuthenticationManager manager;
@@ -28,6 +34,7 @@ public class AuthController {
 
 
     @PostMapping
+    @PublicRoute
     public ResponseEntity<AuthTOAPIView> login(@RequestBody @Valid LoginAuthDTO loginAuthDTO) {
         var token = new UsernamePasswordAuthenticationToken(loginAuthDTO.email(), loginAuthDTO.password());
         var auth = manager.authenticate(token);

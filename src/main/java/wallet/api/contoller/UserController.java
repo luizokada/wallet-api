@@ -1,5 +1,6 @@
 package wallet.api.contoller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -11,11 +12,14 @@ import wallet.api.domain.user.dtos.UpdateUserDTO;
 import wallet.api.domain.user.dtos.UserToApiViewDTO;
 import wallet.api.domain.user.entity.User;
 import wallet.api.domain.user.service.UserService;
+import wallet.api.infra.security.annotations.PublicRoute;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("user")
+@Tag(name = "user", description = "User endpoints")
+
 public class UserController {
     private final UserService userService;
 
@@ -26,6 +30,7 @@ public class UserController {
 
     @PostMapping("/create-user")
     @Transactional
+    @PublicRoute
     public ResponseEntity<UserToApiViewDTO> createUser(@Valid @RequestBody CreateUserDTO userPayload, UriComponentsBuilder uriComponentsBuilder){
 
 

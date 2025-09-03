@@ -1,6 +1,7 @@
 package wallet.api.contoller;
 
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,6 +15,10 @@ import wallet.api.domain.wallet.service.WalletService;
 
 @RestController
 @RequestMapping("wallet")
+@Tag(
+        name = "Wallet",
+        description = "Wallet management endpoints"
+)
 public class WalletController {
 
     private final WalletService walletService;
