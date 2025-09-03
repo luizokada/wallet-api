@@ -1,98 +1,98 @@
 # Wallet API
 
-Uma API REST para gerenciamento de carteiras digitais e controle de despesas, desenvolvida com Spring Boot 3.3.3 e Java 21.
+A REST API for digital wallet management and expense control, developed with Spring Boot 3.3.3 and Java 21.
 
-## 📋 Funcionalidades
+## 📋 Features
 
-- **Gestão de Usuários**: Criação, atualização, listagem e exclusão de usuários
-- **Autenticação JWT**: Sistema de login seguro com tokens JWT
-- **Carteiras Digitais**: Criação e gerenciamento de carteiras por usuário
-- **Controle de Despesas**: Registro, atualização e exclusão de despesas
-- **Categorias de Despesas**: Organização de despesas por categorias
-- **Relatórios**: Consulta de despesas por período
-- **Documentação Swagger**: Interface interativa para testes da API
+- **User Management**: Create, update, list and delete users
+- **JWT Authentication**: Secure login system with JWT tokens
+- **Digital Wallets**: Create and manage wallets per user
+- **Expense Control**: Record, update and delete expenses
+- **Expense Categories**: Organize expenses by categories
+- **Reports**: Query expenses by period
+- **Swagger Documentation**: Interactive interface for API testing
 
-## 🛠️ Tecnologias Utilizadas
+## 🛠️ Technologies Used
 
 - **Java 21**
 - **Spring Boot 3.3.3**
-- **Spring Security** - Autenticação e autorização
-- **Spring Data JPA** - Persistência de dados
-- **PostgreSQL** - Banco de dados
-- **Flyway** - Migração de banco de dados
-- **JWT (Auth0)** - Tokens de autenticação
-- **Swagger/OpenAPI** - Documentação da API
-- **Lombok** - Redução de código boilerplate
-- **Maven** - Gerenciamento de dependências
-- **Docker Compose** - Containerização do ambiente
+- **Spring Security** - Authentication and authorization
+- **Spring Data JPA** - Data persistence
+- **PostgreSQL** - Database
+- **Flyway** - Database migration
+- **JWT (Auth0)** - Authentication tokens
+- **Swagger/OpenAPI** - API documentation
+- **Lombok** - Boilerplate code reduction
+- **Maven** - Dependency management
+- **Docker Compose** - Environment containerization
 
-## ⚙️ Configuração do Ambiente
+## ⚙️ Environment Setup
 
-### Pré-requisitos
+### Prerequisites
 
-- Java 21 ou superior
+- Java 21 or higher
 - Maven 3.6+
-- Docker e Docker Compose (para banco de dados)
+- Docker and Docker Compose (for database)
 
-### Variáveis de Ambiente (.env)
+### Environment Variables (.env)
 
-Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
+Create a `.env` file in the project root with the following variables:
 
 ```env
-# Configurações do Banco de Dados PostgreSQL
+# PostgreSQL Database Settings
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 POSTGRES_DB=wallet_db
 POSTGRES_USER=wallet_user
 POSTGRES_PASSWORD=wallet_password
 
-# Configurações JWT
-JWT_SECRET=sua_chave_secreta_jwt_muito_segura_aqui
+# JWT Settings
+JWT_SECRET=your_very_secure_jwt_secret_key_here
 JWT_EXPIRATION=7
 ```
 
-### Descrição das Variáveis
+### Variable Description
 
-| Variável            | Descrição                             | Exemplo                         |
-| ------------------- | ------------------------------------- | ------------------------------- |
-| `POSTGRES_HOST`     | Host do banco PostgreSQL              | `localhost`                     |
-| `POSTGRES_PORT`     | Porta do banco PostgreSQL             | `5432`                          |
-| `POSTGRES_DB`       | Nome do banco de dados                | `wallet_db`                     |
-| `POSTGRES_USER`     | Usuário do banco                      | `wallet_user`                   |
-| `POSTGRES_PASSWORD` | Senha do banco                        | `wallet_password`               |
-| `JWT_SECRET`        | Chave secreta para assinar tokens JWT | `minha_chave_super_secreta_123` |
-| `JWT_EXPIRATION`    | Tempo de expiração do token em dias   | `7`                             |
+| Variable            | Description                   | Example                   |
+| ------------------- | ----------------------------- | ------------------------- |
+| `POSTGRES_HOST`     | PostgreSQL database host      | `localhost`               |
+| `POSTGRES_PORT`     | PostgreSQL database port      | `5432`                    |
+| `POSTGRES_DB`       | Database name                 | `wallet_db`               |
+| `POSTGRES_USER`     | Database user                 | `wallet_user`             |
+| `POSTGRES_PASSWORD` | Database password             | `wallet_password`         |
+| `JWT_SECRET`        | Secret key to sign JWT tokens | `my_super_secret_key_123` |
+| `JWT_EXPIRATION`    | Token expiration time in days | `7`                       |
 
-## 🚀 Como Executar o Projeto
+## 🚀 How to Run the Project
 
-### 1. Clone o repositório
+### 1. Clone the repository
 
 ```bash
-git clone <url-do-repositorio>
+git clone <repository-url>
 cd wallet-api
 ```
 
-### 2. Configure o arquivo .env
+### 2. Configure the .env file
 
-Crie um arquivo `.env` na raiz do projeto com as variáveis mostradas na seção anterior:
+Create a `.env` file in the project root with the variables shown in the previous section:
 
 ```bash
-# Crie o arquivo .env
+# Create the .env file
 touch .env
 
-# Edite o arquivo e adicione as variáveis de ambiente
-nano .env  # ou use seu editor preferido
+# Edit the file and add the environment variables
+nano .env  # or use your preferred editor
 ```
 
-### 3. Inicie o banco de dados com Docker
+### 3. Start the database with Docker
 
 ```bash
 docker-compose up -d
 ```
 
-### 4. Execute a aplicação com Maven
+### 4. Run the application with Maven
 
-#### Opção A: Usando o Maven Wrapper (Recomendado)
+#### Option A: Using Maven Wrapper (Recommended)
 
 ```bash
 # Linux/Mac
@@ -102,138 +102,265 @@ mvn spring-boot:run
 mvnw.cmd spring-boot:run
 ```
 
-#### Opção B: Usando Maven instalado globalmente
+#### Option B: Using globally installed Maven
 
 ```bash
 mvn spring-boot:run
 ```
 
-### 5. Acesse a aplicação
+### 5. Access the application
 
 - **API Base URL**: `http://localhost:8080`
 - **Swagger UI**: `http://localhost:8080/swagger-ui/index.html/`
 
-## 📊 Estrutura do Banco de Dados
+## 📊 Database Structure
 
-O projeto utiliza Flyway para versionamento do banco. As migrações são executadas automaticamente na inicialização.
+The project uses Flyway for database versioning. Migrations are executed automatically on startup.
 
-### Principais Entidades:
+### Main Entities:
 
-- **Users**: Usuários do sistema
-- **Wallets**: Carteiras dos usuários
-- **Expenses**: Despesas registradas
-- **Expense_Categories**: Categorias de despesas
+- **Users**: System users
+- **Wallets**: User wallets
+- **Expenses**: Recorded expenses
+- **Expense_Categories**: Expense categories
 
-## 🔗 Endpoints da API
+## 🔗 API Endpoints
 
-### Autenticação
+### Authentication
 
-- `POST /login` - Fazer login e obter token JWT
+- `POST /login` - Login and get JWT token
 
-### Usuários
+### Users
 
-- `POST /user/create-user` - Criar novo usuário
-- `GET /user/me` - Obter dados do usuário logado
-- `GET /user` - Listar todos os usuários
-- `PATCH /user/{id}` - Atualizar usuário
-- `DELETE /user/{id}` - Excluir usuário
+- `POST /user/create-user` - Create new user
+- `GET /user/me` - Get logged user data
+- `GET /user` - List all users
+- `PATCH /user/{id}` - Update user
+- `DELETE /user/{id}` - Delete user
 
-### Carteiras
+### Wallets
 
-- `POST /wallet` - Criar carteira
-- `POST /wallet/{id}` - Obter carteira com despesas por período
-- `PATCH /wallet/{id}` - Atualizar saldo da carteira
+- `POST /wallet` - Create wallet
+- `POST /wallet/{id}` - Get wallet with expenses by period
+- `PATCH /wallet/{id}` - Update wallet balance
 
-### Despesas
+### Expenses
 
-- `POST /expense` - Criar nova despesa
-- `GET /expense/{id}` - Obter despesa por ID
-- `PATCH /expense/{id}` - Atualizar despesa
-- `DELETE /expense/{id}` - Excluir despesa
+- `POST /expense` - Create new expense
+- `GET /expense/{id}` - Get expense by ID
+- `PATCH /expense/{id}` - Update expense
+- `DELETE /expense/{id}` - Delete expense
 
-### Categorias de Despesas
+### Expense Categories
 
-- `POST /expense-category` - Criar categoria
-- `GET /expense-category` - Listar categorias
-- `PATCH /expense-category/{id}` - Atualizar categoria
+- `POST /expense-category` - Create category
+- `GET /expense-category` - List categories
+- `PATCH /expense-category/{id}` - Update category
 
-## 🔧 Comandos Maven Úteis
+## 🔧 Useful Maven Commands
 
 ```bash
-# Compilar o projeto
+# Compile the project
 mvn compile
 
-# Executar testes
+# Run tests
 mvn test
 
-# Gerar pacote JAR
+# Generate JAR package
 mvn package
 
-# Limpar e compilar
+# Clean and compile
 mvn clean compile
 
-# Executar com perfil específico
+# Run with specific profile
 mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
-# Pular testes durante o build
+# Skip tests during build
 mvn package -DskipTests
 ```
 
 ## 🐳 Docker
 
-### Executar apenas o banco de dados
+The project is fully containerized and can be run using Docker and Docker Compose, including both the PostgreSQL database and the Spring Boot application.
+
+### Docker Prerequisites
+
+- Docker Engine 20.10+
+- Docker Compose 2.0+
+
+### Initial Setup
+
+1. **Create the `.env` file** in the project root:
+
+```bash
+# Copy and paste in terminal to create the .env file
+cat > .env << 'EOF'
+# PostgreSQL Database Settings
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=wallet_db
+POSTGRES_USER=wallet_user
+POSTGRES_PASSWORD=wallet_password
+
+# JWT Settings
+JWT_SECRET=your_very_secure_jwt_secret_key_here_change_this
+JWT_EXPIRATION=7
+EOF
+```
+
+### Run Complete Project (Recommended)
+
+```bash
+# Build and run all services (database + API)
+docker-compose up --build
+
+# Or run in background (detached mode)
+docker-compose up --build -d
+```
+
+This command will:
+
+- Build the application Docker image
+- Start the PostgreSQL container
+- Wait for the database to become healthy (healthcheck)
+- Start the Spring Boot application
+- Automatically connect the API to the database
+
+### Run Services Individually
+
+```bash
+# Run only the database
+docker-compose up postgres -d
+
+# Run only the API (make sure the database is running)
+docker-compose up wallet-api
+
+# Run the API in background
+docker-compose up wallet-api -d
+```
+
+### Useful Commands
+
+```bash
+# View logs of all services
+docker-compose logs
+
+# View logs only of the API
+docker-compose logs wallet-api
+
+# View logs only of the database
+docker-compose logs postgres
+
+# View logs in real time (follow)
+docker-compose logs -f wallet-api
+
+# Check containers status
+docker-compose ps
+
+# Stop all services
+docker-compose down
+
+# Stop and remove volumes (⚠️ deletes database data)
+docker-compose down -v
+
+# Rebuild only the API (after code changes)
+docker-compose build wallet-api
+docker-compose up wallet-api -d
+
+# Enter the API container for debugging
+docker-compose exec wallet-api sh
+
+# Enter the PostgreSQL container
+docker-compose exec postgres psql -U wallet_user -d wallet_db
+```
+
+### Access the Application
+
+After running `docker-compose up --build`, the application will be available at:
+
+- **API Base URL**: `http://localhost:8080`
+- **Swagger UI**: `http://localhost:8080/swagger-ui/index.html`
+- **PostgreSQL**: `localhost:5432` (for external connections)
+
+### Docker Structure
+
+The project uses:
+
+- **Multi-stage Dockerfile**: Optimized with Alpine Linux for smaller images
+- **Docker Compose**: Orchestrates database and application with dependencies
+- **Health Checks**: Ensures database is ready before starting the API
+- **Persistent volumes**: PostgreSQL data is maintained between restarts
+- **Isolated network**: Secure communication between containers
+
+### Docker Troubleshooting
+
+```bash
+# If the API doesn't connect to the database, check logs
+docker-compose logs wallet-api
+
+# Restart only the API
+docker-compose restart wallet-api
+
+# Clear Docker cache (if there are build issues)
+docker system prune -a
+
+# Check if environment variables are correct
+docker-compose config
+```
+
+### Development with Docker
+
+For active development, you can:
+
+1. **Use only the database via Docker**:
 
 ```bash
 docker-compose up postgres -d
 ```
 
-### Parar os serviços
+2. **Run the application locally**:
 
 ```bash
-docker-compose down
+mvn spring-boot:run
 ```
 
-### Ver logs do banco
+This allows hot reload during development while keeping the database containerized.
 
-```bash
-docker-compose logs postgres
-```
+## 🔒 Security
 
-## 🔒 Segurança
+- The API uses JWT for authentication
+- Public endpoints: `/login`, `/user/create-user`, `/swagger-ui/**`, `/api-docs`
+- All other endpoints require authentication
+- Passwords are encrypted with BCrypt
 
-- A API utiliza JWT para autenticação
-- Endpoints públicos: `/login`, `/user/create-user`, `/swagger-ui/**`, `/api-docs`
-- Todos os outros endpoints requerem autenticação
-- Senhas são criptografadas com BCrypt
+## 📝 Development
 
-## 📝 Desenvolvimento
-
-### Estrutura do Projeto
+### Project Structure
 
 ```
 src/main/java/wallet/api/
-├── controller/          # Controllers REST
-├── domain/             # Entidades e lógica de negócio
-│   ├── auth/          # Autenticação
-│   ├── expense/       # Despesas
-│   ├── expenseCategory/ # Categorias
-│   ├── user/          # Usuários
-│   └── wallet/        # Carteiras
-├── errors/            # Tratamento de exceções
-└── infra/             # Configurações de infraestrutura
-    ├── config/        # Configurações Spring
-    ├── jwt/           # Serviços JWT
-    └── security/      # Configurações de segurança
+├── controller/          # REST Controllers
+├── domain/             # Entities and business logic
+│   ├── auth/          # Authentication
+│   ├── expense/       # Expenses
+│   ├── expenseCategory/ # Categories
+│   ├── user/          # Users
+│   └── wallet/        # Wallets
+├── errors/            # Exception handling
+└── infra/             # Infrastructure configurations
+    ├── config/        # Spring configurations
+    ├── jwt/           # JWT services
+    └── security/      # Security configurations
 ```
 
 ### Hot Reload
 
-O projeto está configurado com Spring Boot DevTools para reinicialização automática durante o desenvolvimento.
+The project is configured with Spring Boot DevTools for automatic restart during development (only when running locally).
 
-## 🤝 Contribuição
+## 🤝 Contributing
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
