@@ -1,0 +1,6 @@
+FROM alpine/java:21-jdk AS builder
+RUN apk add maven
+WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
+ENTRYPOINT [ "mvn" , "spring-boot:run" ]

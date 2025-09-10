@@ -17,10 +17,7 @@ import wallet.api.infra.security.annotations.PublicRoute;
 
 @RestController
 @RequestMapping("/login")
-@Tag(
-        name = "Authentication",
-        description = "Endpoints for user authentication and JWT token generation"
-)
+@Tag(name = "Authentication", description = "Endpoints for user authentication and JWT token generation")
 public class AuthController {
 
     private final AuthenticationManager manager;
@@ -32,7 +29,6 @@ public class AuthController {
         this.tokenService = tokenService;
     }
 
-
     @PostMapping
     @PublicRoute
     public ResponseEntity<AuthTOAPIView> login(@RequestBody @Valid LoginAuthDTO loginAuthDTO) {
@@ -40,6 +36,6 @@ public class AuthController {
         var auth = manager.authenticate(token);
         var logedUser = (User) auth.getPrincipal();
         var jwtToken = tokenService.createToken(logedUser);
-        return ResponseEntity.ok(new AuthTOAPIView(logedUser.getId(), logedUser.getName(),jwtToken));
+        return ResponseEntity.ok(new AuthTOAPIView(logedUser.getId(), logedUser.getName(), jwtToken));
     }
 }

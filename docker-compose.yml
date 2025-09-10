@@ -15,8 +15,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       PG_DATA: /var/lib/postgresql/data
     healthcheck:
-      test:
-        ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}" ]
       interval: 10s
       timeout: 10s
       retries: 5
@@ -35,7 +34,7 @@ services:
       - .env
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     networks:
       - wallet_network
     environment:
@@ -61,9 +60,12 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - .:/app
 
 networks:
   wallet_network:
     driver: bridge
 volumes:
   pgdata:
+    driver: local
