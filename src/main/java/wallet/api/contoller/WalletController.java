@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import wallet.api.domain.user.entity.User;
 import wallet.api.domain.wallet.dto.GetWalletDTO;
-import wallet.api.domain.wallet.dto.UpdateWalletDTO;
-import wallet.api.domain.wallet.dto.WalletToApiViewDTO;
 import wallet.api.domain.wallet.service.WalletService;
 
 @RestController
@@ -40,24 +38,12 @@ public class WalletController {
     }
 
     @PostMapping("/{id}")
-    @Operation(summary = "Get wallet with expenses", description = "Returns the wallet and its expenses filtered by the period sent in the body.")
-    @ApiResponse(responseCode = "200", description = "Wallet with expenses for the period")
+    @Operation(summary = "Get wallet with transactions", description = "Returns the wallet with its derived balance (sum of incomes minus expenses, in cents) and the transactions of the period sent in the body.")
+    @ApiResponse(responseCode = "200", description = "Wallet with derived balance and transactions for the period")
     @ApiResponse(responseCode = "404", description = "Wallet not found")
     public ResponseEntity<Object> getWallet(@PathVariable String id, @RequestBody @Valid GetWalletDTO param) {
-        var wallet = walletService.getWalletAndExpenses(id, param);
+        var wallet = walletService.getWalletAndTransactions(id, param);
         return ResponseEntity.ok(wallet);
-    }
-
-
-    @PatchMapping("/{id}")
-    @Operation(summary = "Update wallet", description = "Updates the wallet balance.")
-    @ApiResponse(responseCode = "200", description = "Wallet updated")
-    @ApiResponse(responseCode = "404", description = "Wallet not found")
-    public ResponseEntity<Object> updateWallet( @PathVariable String id, @RequestBody @Valid UpdateWalletDTO param) {
-        var wallet = walletService.updateWallet(id, param);
-
-
-        return ResponseEntity.ok(new WalletToApiViewDTO(wallet));
     }
 
 
