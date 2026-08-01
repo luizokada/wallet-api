@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import wallet.api.domain.user.dtos.CreateUserDTO;
 import wallet.api.domain.user.dtos.UpdateUserDTO;
 import wallet.api.domain.wallet.entity.Wallet;
@@ -36,11 +35,10 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user",cascade = CascadeType.PERSIST)
     private Wallet wallet;
 
-    public User(CreateUserDTO createUserDTO) {
+    public User(CreateUserDTO createUserDTO, String encodedPassword) {
         this.name = createUserDTO.name();
         this.email = createUserDTO.email();
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(16);
-        this.password = encoder.encode(createUserDTO.password());
+        this.password = encodedPassword;
         this.wallet = new Wallet(this);
 
     }

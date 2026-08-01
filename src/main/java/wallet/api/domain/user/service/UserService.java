@@ -1,5 +1,6 @@
 package wallet.api.domain.user.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import wallet.api.domain.user.dtos.CreateUserDTO;
 import wallet.api.domain.user.dtos.UpdateUserDTO;
@@ -15,9 +16,12 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
 
     }
 
@@ -30,12 +34,11 @@ public class UserService {
     }
 
     public User createUser(CreateUserDTO userPayload) {
-        User user = new User(userPayload);
-
-        User founduser = userRepository.findByEmail(user.getEmail());
+        User founduser = userRepository.findByEmail(userPayload.email());
         if (founduser != null) {
             throw new UserEmailError();
         }
+        User user = new User(userPayload, passwordEncoder.encode(userPayload.password()));
         var createdUser =  userRepository.save(user);
         return createdUser;
     }

@@ -13,6 +13,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import wallet.api.domain.auth.AuthRepository;
+import wallet.api.errors.auth.InvalidTokenError;
 import wallet.api.errors.auth.NoTokenError;
 import wallet.api.infra.jwt.JWTService;
 import wallet.api.infra.security.annotations.PublicRoute;
@@ -42,6 +43,9 @@ public class SecurityFilter extends OncePerRequestFilter {
             }
             var decodedSubject = tokenService.getDecodedToken(token);
             var user = authRepository.findByEmail(decodedSubject);
+            if(user == null){
+                throw new InvalidTokenError();
+            }
             var authorise = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
 
             SecurityContextHolder.getContext().setAuthentication(authorise);
@@ -87,7 +91,7 @@ public class SecurityFilter extends OncePerRequestFilter {
             }
         }
         response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        response.getWriter().write(getErrorResponse("", path, "500", "Bad Request"));
+        response.getWriter().write(getErrorResponse("", path, "500", "Internal Server Error"));
 
     }
     @Override

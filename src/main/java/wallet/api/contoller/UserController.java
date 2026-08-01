@@ -12,6 +12,7 @@ import wallet.api.domain.user.dtos.UpdateUserDTO;
 import wallet.api.domain.user.dtos.UserToApiViewDTO;
 import wallet.api.domain.user.entity.User;
 import wallet.api.domain.user.service.UserService;
+import wallet.api.errors.user.NotResourceOwnerError;
 import wallet.api.infra.security.annotations.PublicRoute;
 
 import java.util.List;
@@ -48,8 +49,10 @@ public class UserController {
 
     @PatchMapping("/{id}")
     @Transactional
-    public ResponseEntity<UserToApiViewDTO> updateUser(@PathVariable String id, @Valid @RequestBody UpdateUserDTO userPayload){
-
+    public ResponseEntity<UserToApiViewDTO> updateUser(@PathVariable String id, @Valid @RequestBody UpdateUserDTO userPayload, @AuthenticationPrincipal User loggedUser){
+        if(!loggedUser.getId().equals(id)){
+            throw new NotResourceOwnerError();
+        }
         User updatedUser = userService.updateUser(id, userPayload);
         return ResponseEntity.ok().body(new UserToApiViewDTO(updatedUser)) ;
     }
@@ -62,7 +65,10 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @Transactional
-    public ResponseEntity<Object> deleteUser(@PathVariable String id){
+    public ResponseEntity<Object> deleteUser(@PathVariable String id, @AuthenticationPrincipal User loggedUser){
+        if(!loggedUser.getId().equals(id)){
+            throw new NotResourceOwnerError();
+        }
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
