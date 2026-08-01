@@ -1,5 +1,6 @@
 package wallet.api.infra.config;
 
+import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +34,9 @@ public class SecurityConfig {
     }
     @Bean
     public Jackson2ObjectMapperBuilder mapperBuilder() {
-        return new Jackson2ObjectMapperBuilder().failOnUnknownProperties(true);
+        return new Jackson2ObjectMapperBuilder()
+                .failOnUnknownProperties(true)
+                .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     @Bean

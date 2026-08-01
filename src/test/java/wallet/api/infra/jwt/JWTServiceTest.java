@@ -26,7 +26,7 @@ class JWTServiceTest {
 
     @Test
     void shouldCreateAndDecodeToken() {
-        var user = new User("user-id", "Test User", "user@example.com", "hash", null, null);
+        var user = new User("user-id", "Test User", "user@example.com", "hash", null, null, null, null);
 
         var token = jwtService.createToken(user);
 
@@ -41,7 +41,7 @@ class JWTServiceTest {
 
     @Test
     void shouldThrowForTokenSignedWithAnotherSecret() {
-        var user = new User("user-id", "Test User", "user@example.com", "hash", null, null);
+        var user = new User("user-id", "Test User", "user@example.com", "hash", null, null, null, null);
         var token = jwtService.createToken(user);
 
         ReflectionTestUtils.setField(jwtService, "jwtSecret", "another-secret");

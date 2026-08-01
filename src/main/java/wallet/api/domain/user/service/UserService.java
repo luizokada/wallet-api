@@ -6,6 +6,7 @@ import wallet.api.domain.user.dtos.CreateUserDTO;
 import wallet.api.domain.user.dtos.UpdateUserDTO;
 import wallet.api.domain.user.entity.User;
 import wallet.api.domain.user.repository.UserRepository;
+import wallet.api.errors.user.UserDocumentError;
 import wallet.api.errors.user.UserEmailError;
 import wallet.api.errors.user.UserNotFound;
 
@@ -38,6 +39,9 @@ public class UserService {
         if (founduser != null) {
             throw new UserEmailError();
         }
+        if (userPayload.document() != null && userRepository.findByDocument(userPayload.document()) != null) {
+            throw new UserDocumentError();
+        }
         User user = new User(userPayload, passwordEncoder.encode(userPayload.password()));
         var createdUser =  userRepository.save(user);
         return createdUser;
@@ -47,6 +51,12 @@ public class UserService {
         User foundUser = userRepository.findById(id).orElse(null);
         if(foundUser==null){
             throw new UserNotFound();
+        }
+        if (userPayload.document() != null) {
+            User documentOwner = userRepository.findByDocument(userPayload.document());
+            if (documentOwner != null && !id.equals(documentOwner.getId())) {
+                throw new UserDocumentError();
+            }
         }
         foundUser.updateUser(userPayload);
         return userRepository.save(foundUser);

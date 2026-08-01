@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface UserRepository extends JpaRepository<User,String> {
     User findByEmail(String email);
+    User findByDocument(String document);
     List<User> findAllByDeletedAtIsNull();
 
 

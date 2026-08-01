@@ -12,6 +12,7 @@ import wallet.api.domain.user.dtos.CreateUserDTO;
 import wallet.api.domain.user.dtos.UpdateUserDTO;
 import wallet.api.domain.wallet.entity.Wallet;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -30,6 +31,8 @@ public class User implements UserDetails {
     private String name;
     private String email;
     private String password;
+    private String document;
+    private LocalDate birthday;
     private Date deletedAt;
 
     @OneToOne(mappedBy = "user",cascade = CascadeType.PERSIST)
@@ -39,6 +42,8 @@ public class User implements UserDetails {
         this.name = createUserDTO.name();
         this.email = createUserDTO.email();
         this.password = encodedPassword;
+        this.document = createUserDTO.document();
+        this.birthday = createUserDTO.birthday();
         this.wallet = new Wallet(this);
 
     }
@@ -47,6 +52,12 @@ public class User implements UserDetails {
         if (userPayload.name() != null){
             this.name = userPayload.name();
         }
+        if (userPayload.document() != null){
+            this.document = userPayload.document();
+        }
+        if (userPayload.birthday() != null){
+            this.birthday = userPayload.birthday();
+        }
 
     }
 
@@ -54,6 +65,8 @@ public class User implements UserDetails {
         this.name = "";
         this.email = new Date().toString();
         this.password =  new Date().toString();
+        this.document = null;
+        this.birthday = null;
         this.deletedAt = new Date();
     }
 

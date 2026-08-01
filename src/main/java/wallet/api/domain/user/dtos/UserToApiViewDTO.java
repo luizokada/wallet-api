@@ -2,11 +2,12 @@ package wallet.api.domain.user.dtos;
 
 import wallet.api.domain.user.entity.User;
 
+import java.time.LocalDate;
 import java.util.List;
 
-public record UserToApiViewDTO(String id, String email, String name, String walletId) {
+public record UserToApiViewDTO(String id, String email, String name, String document, LocalDate birthday, String walletId) {
     public UserToApiViewDTO(User user){
-        this(user.getId(), user.getEmail(), user.getName(),user.getWalletId());
+        this(user.getId(), user.getEmail(), user.getName(), user.getDocument(), user.getBirthday(), user.getWalletId());
     }
     public static List<UserToApiViewDTO> toList(List<User> users) {
         return users.stream()
