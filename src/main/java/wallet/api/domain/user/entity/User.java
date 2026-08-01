@@ -61,6 +61,10 @@ public class User implements UserDetails {
 
     }
 
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
+
     public void deleteUser(){
         this.name = "";
         this.email = new Date().toString();

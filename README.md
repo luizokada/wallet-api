@@ -49,6 +49,20 @@ POSTGRES_PASSWORD=wallet_password
 # JWT Settings
 JWT_SECRET=your_very_secure_jwt_secret_key_here
 JWT_EXPIRATION=7
+
+# Mail (Gmail SMTP) — MAIL_PASSWORD is a Google "App Password"
+# (Google Account > Security > 2-Step Verification > App passwords)
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-16-char-app-password
+
+# Link sent in the password recovery email (front-end page)
+PASSWORD_RESET_URL=http://localhost:5173/reset-password
+
+# Google OAuth client (reserved for a future Gmail API flow — not used yet)
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-google-client-secret
 ```
 
 ### Variable Description
@@ -205,6 +219,17 @@ POSTGRES_PASSWORD=wallet_password
 # JWT Settings
 JWT_SECRET=your_very_secure_jwt_secret_key_here_change_this
 JWT_EXPIRATION=7
+
+# Mail (Gmail SMTP) — use a Google "App Password", not your account password
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-16-char-app-password
+PASSWORD_RESET_URL=http://localhost:5173/reset-password
+
+# Google OAuth client (reserved for a future Gmail API flow — not used yet)
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-google-client-secret
 EOF
 ```
 
