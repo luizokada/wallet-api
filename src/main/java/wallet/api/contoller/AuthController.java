@@ -1,5 +1,7 @@
 package wallet.api.contoller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +33,9 @@ public class AuthController {
 
     @PostMapping
     @PublicRoute
+    @Operation(summary = "Login", description = "Authenticates the user with email and password and returns a JWT token.")
+    @ApiResponse(responseCode = "200", description = "Authenticated, returns user id, name and JWT token")
+    @ApiResponse(responseCode = "401", description = "Invalid email or password")
     public ResponseEntity<AuthTOAPIView> login(@RequestBody @Valid LoginAuthDTO loginAuthDTO) {
         var token = new UsernamePasswordAuthenticationToken(loginAuthDTO.email(), loginAuthDTO.password());
         var auth = manager.authenticate(token);

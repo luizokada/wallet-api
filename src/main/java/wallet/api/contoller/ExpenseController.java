@@ -1,6 +1,8 @@
 package wallet.api.contoller;
 
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +31,9 @@ public class ExpenseController {
     }
 
     @PostMapping
+    @Operation(summary = "Create expense", description = "Creates an expense in the authenticated user's wallet, optionally linked to a category.")
+    @ApiResponse(responseCode = "201", description = "Expense created")
+    @ApiResponse(responseCode = "404", description = "User has no wallet or category not found")
     public ResponseEntity<ExpenseToApiViewDto> createExpense(@AuthenticationPrincipal User user, @RequestBody @Valid CreateExpenseDTO body, UriComponentsBuilder uriBuild) {
         var createdExpense = this.expenseService.createExpense(user,body);
 
@@ -45,6 +50,9 @@ public class ExpenseController {
     }
 
     @PatchMapping("/{id}")
+    @Operation(summary = "Update expense", description = "Updates an expense's data (amount, description, category, date).")
+    @ApiResponse(responseCode = "200", description = "Expense updated")
+    @ApiResponse(responseCode = "404", description = "Expense not found")
     public ResponseEntity<ExpenseToApiViewDto> updateExpense(@AuthenticationPrincipal User user,@PathVariable String id, @RequestBody @Valid UpdateExpenseDTO payload) {
 
         var updatedExpense = this.expenseService.updateExpense(id, user, payload);
@@ -58,6 +66,9 @@ public class ExpenseController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete expense", description = "Deletes an expense by id.")
+    @ApiResponse(responseCode = "200", description = "Expense deleted")
+    @ApiResponse(responseCode = "404", description = "Expense not found")
     public ResponseEntity<Void> deleteExpenseCategory(@PathVariable String id) {
         expenseService.deleteExpense(id);
 
@@ -65,6 +76,9 @@ public class ExpenseController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get expense", description = "Returns an expense by id.")
+    @ApiResponse(responseCode = "200", description = "Expense data")
+    @ApiResponse(responseCode = "404", description = "Expense not found")
     public ResponseEntity<ExpenseToApiViewDto> getExpenseCategoryById(@PathVariable String id) {
         var expense = expenseService.getExpense(id);
         ExpenseCateogryToApiVIewDTO categoryJson = null;
