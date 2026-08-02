@@ -5,6 +5,7 @@ A REST API for digital wallet management and expense control, developed with Spr
 ## 📋 Features
 
 - **User Management**: Create, update, list and delete users
+- **Profile Picture**: Upload the user avatar to a Supabase Storage bucket
 - **JWT Authentication**: Secure login system with JWT tokens
 - **Digital Wallets**: Create and manage wallets per user
 - **Expense Control**: Record, update and delete expenses
@@ -63,19 +64,33 @@ PASSWORD_RESET_URL=http://localhost:5173/reset-password
 # Google OAuth client (reserved for a future Gmail API flow — not used yet)
 GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# Supabase Storage (user avatar) — keys come from Storage > S3 Connection
+SUPABASE_BUCKET_NAME=wallet
+SUPABASE_BUCKET_URL=https://your-project.supabase.co/storage/v1/object/public/
+SUPABASE_BUCKET_ACCESS_KEY=your-s3-access-key
+SUPABASE_BUCKET_SECRET_KEY=your-s3-secret-key
+SUPABASE_S3_ENDPOINT=https://your-project.supabase.co/storage/v1/s3
+SUPABASE_S3_REGION=us-east-1
 ```
 
 ### Variable Description
 
-| Variable            | Description                   | Example                   |
-| ------------------- | ----------------------------- | ------------------------- |
-| `POSTGRES_HOST`     | PostgreSQL database host      | `localhost`               |
-| `POSTGRES_PORT`     | PostgreSQL database port      | `5432`                    |
-| `POSTGRES_DB`       | Database name                 | `wallet_db`               |
-| `POSTGRES_USER`     | Database user                 | `wallet_user`             |
-| `POSTGRES_PASSWORD` | Database password             | `wallet_password`         |
-| `JWT_SECRET`        | Secret key to sign JWT tokens | `my_super_secret_key_123` |
-| `JWT_EXPIRATION`    | Token expiration time in days | `7`                       |
+| Variable                     | Description                              | Example                                                    |
+| ---------------------------- | ---------------------------------------- | ---------------------------------------------------------- |
+| `POSTGRES_HOST`              | PostgreSQL database host                 | `localhost`                                                |
+| `POSTGRES_PORT`              | PostgreSQL database port                 | `5432`                                                     |
+| `POSTGRES_DB`                | Database name                            | `wallet_db`                                                |
+| `POSTGRES_USER`              | Database user                            | `wallet_user`                                              |
+| `POSTGRES_PASSWORD`          | Database password                        | `wallet_password`                                          |
+| `JWT_SECRET`                 | Secret key to sign JWT tokens            | `my_super_secret_key_123`                                  |
+| `JWT_EXPIRATION`             | Token expiration time in days            | `7`                                                        |
+| `SUPABASE_BUCKET_NAME`       | Storage bucket that holds the avatars    | `wallet`                                                   |
+| `SUPABASE_BUCKET_URL`        | Public base URL of the bucket            | `https://xxx.supabase.co/storage/v1/object/public/`        |
+| `SUPABASE_BUCKET_ACCESS_KEY` | S3 access key (Storage > S3 Connection)  | `314effb8...`                                              |
+| `SUPABASE_BUCKET_SECRET_KEY` | S3 secret key (Storage > S3 Connection)  | `a65c4ce8...`                                              |
+| `SUPABASE_S3_ENDPOINT`       | S3-compatible endpoint of the project    | `https://xxx.supabase.co/storage/v1/s3`                    |
+| `SUPABASE_S3_REGION`         | Project region, used to sign the request | `us-east-1`                                                |
 
 ## 🚀 How to Run the Project
 
@@ -150,6 +165,8 @@ The project uses Flyway for database versioning. Migrations are executed automat
 - `GET /user/me` - Get logged user data
 - `GET /user` - List all users
 - `PATCH /user/{id}` - Update user
+- `POST /user/{id}/avatar` - Upload profile picture (multipart field `file`, JPEG/PNG/WEBP up to 2 MB)
+- `DELETE /user/{id}/avatar` - Remove profile picture
 - `DELETE /user/{id}` - Delete user
 
 ### Wallets
@@ -230,6 +247,14 @@ PASSWORD_RESET_URL=http://localhost:5173/reset-password
 # Google OAuth client (reserved for a future Gmail API flow — not used yet)
 GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# Supabase Storage (user avatar) — keys come from Storage > S3 Connection
+SUPABASE_BUCKET_NAME=wallet
+SUPABASE_BUCKET_URL=https://your-project.supabase.co/storage/v1/object/public/
+SUPABASE_BUCKET_ACCESS_KEY=your-s3-access-key
+SUPABASE_BUCKET_SECRET_KEY=your-s3-secret-key
+SUPABASE_S3_ENDPOINT=https://your-project.supabase.co/storage/v1/s3
+SUPABASE_S3_REGION=us-east-1
 EOF
 ```
 

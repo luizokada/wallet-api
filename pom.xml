@@ -106,7 +106,32 @@
 			<version>2.6.0</version>
 		</dependency>
 
+		<!-- Storage do avatar: o Supabase Storage expõe uma API compatível com S3,
+		     então usamos o SDK da AWS apontando para o endpoint do projeto -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+		</dependency>
+		<!-- Cliente HTTP leve do SDK. O padrão (Apache 5) conflita com a versão do
+		     httpclient5 que o Spring Boot 3.3 fixa -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>url-connection-client</artifactId>
+		</dependency>
+
 	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>software.amazon.awssdk</groupId>
+				<artifactId>bom</artifactId>
+				<version>2.50.2</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<plugins>

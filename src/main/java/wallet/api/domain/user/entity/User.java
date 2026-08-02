@@ -33,6 +33,8 @@ public class User implements UserDetails {
     private String password;
     private String document;
     private LocalDate birthday;
+    // Caminho do objeto no bucket, sem o domínio do storage
+    private String avatarPath;
     private Date deletedAt;
 
     @OneToOne(mappedBy = "user",cascade = CascadeType.PERSIST)
@@ -65,12 +67,17 @@ public class User implements UserDetails {
         this.password = encodedPassword;
     }
 
+    public void changeAvatar(String avatarPath) {
+        this.avatarPath = avatarPath;
+    }
+
     public void deleteUser(){
         this.name = "";
         this.email = new Date().toString();
         this.password =  new Date().toString();
         this.document = null;
         this.birthday = null;
+        this.avatarPath = null;
         this.deletedAt = new Date();
     }
 

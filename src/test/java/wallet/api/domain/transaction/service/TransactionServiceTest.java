@@ -41,7 +41,7 @@ class TransactionServiceTest {
     @InjectMocks
     private TransactionService transactionService;
 
-    private final User user = new User("user-id", "Test User", "user@example.com", "hash", null, null, null, null);
+    private final User user = new User("user-id", "Test User", "user@example.com", "hash", null, null, null, null, null);
     private final Wallet wallet = new Wallet(user);
     private final Category incomeCategory = new Category("cat-income", "Salário", "desc", TransactionType.INCOME);
     private final Category expenseCategory = new Category("cat-expense", "Mercado", "desc", TransactionType.EXPENSE);
@@ -140,7 +140,7 @@ class TransactionServiceTest {
         var existing = new Transaction(wallet, null,
                 new CreateTransactionDTO(TransactionType.EXPENSE, new Date(), "mercado", 3000, null));
         when(transactionRepository.findTransactionById("t-1")).thenReturn(existing);
-        var otherUser = new User("other-id", "Other User", "other@example.com", "hash", null, null, null, null);
+        var otherUser = new User("other-id", "Other User", "other@example.com", "hash", null, null, null, null, null);
 
         assertThrows(NotTransactionOwnerError.class,
                 () -> transactionService.deleteTransaction("t-1", otherUser));

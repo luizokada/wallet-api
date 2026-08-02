@@ -47,7 +47,7 @@ class PasswordRecoveryServiceTest {
     @InjectMocks
     private PasswordRecoveryService passwordRecoveryService;
 
-    private final User user = new User("user-id", "Test User", "user@example.com", "old-hash", null, null, null, null);
+    private final User user = new User("user-id", "Test User", "user@example.com", "old-hash", null, null, null, null, null);
 
     @BeforeEach
     void setup() {
