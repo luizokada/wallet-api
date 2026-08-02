@@ -78,6 +78,7 @@ SUPABASE_S3_REGION=us-east-1
 GOOGLE_GEMINI_API_KEY=your-gemini-api-key
 GEMINI_MODEL=gemini-3.5-flash-lite
 GEMINI_MIN_CONFIDENCE=0.7
+GEMINI_RATE_LIMIT_SECONDS=30
 ```
 
 ### Variable Description
@@ -100,6 +101,7 @@ GEMINI_MIN_CONFIDENCE=0.7
 | `GOOGLE_GEMINI_API_KEY`      | Key for the category suggestion feature  | `AIza...`                                                  |
 | `GEMINI_MODEL`               | Model used to classify statement lines   | `gemini-3.5-flash-lite`                                    |
 | `GEMINI_MIN_CONFIDENCE`      | Below this, the item is left uncategorized | `0.7`                                                    |
+| `GEMINI_RATE_LIMIT_SECONDS`  | Seconds between classifications per user | `30` (`0` disables)                                        |
 
 ## 🚀 How to Run the Project
 
