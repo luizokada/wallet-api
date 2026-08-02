@@ -1,4 +1,4 @@
-package wallet.api.domain.auth;
+package wallet.api.domain.auth.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,6 +9,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
+import wallet.api.domain.auth.entity.PasswordResetToken;
+import wallet.api.domain.auth.repository.PasswordResetTokenRepository;
 import wallet.api.domain.user.entity.User;
 import wallet.api.domain.user.repository.UserRepository;
 import wallet.api.errors.auth.InvalidResetTokenError;

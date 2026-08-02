@@ -7,6 +7,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import wallet.api.errors.ai.ClassificationRateLimitedError;
 
 @RestControllerAdvice
 public class ErrorHandler {
@@ -21,6 +22,16 @@ public class ErrorHandler {
     public ResponseEntity<Object> handleAuthenticationError(AuthenticationException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new AuthenticationError("Unauthorized", "Invalid email or password"));
+    }
+
+    @ExceptionHandler(ClassificationRateLimitedError.class)
+    public ResponseEntity<Object> handleClassificationRateLimited(ClassificationRateLimitedError e) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header("Retry-After", String.valueOf(e.getRetryAfterSeconds()))
+                .body(new RateLimitError(e.getMessage(), e.getRetryAfterSeconds()));
+    }
+
+    private record RateLimitError(String message, long retryAfterSeconds) {
     }
 
     private record AuthenticationError(String error, String msg) {

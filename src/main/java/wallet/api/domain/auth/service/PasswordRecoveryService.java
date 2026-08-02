@@ -1,8 +1,10 @@
-package wallet.api.domain.auth;
+package wallet.api.domain.auth.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import wallet.api.domain.auth.entity.PasswordResetToken;
+import wallet.api.domain.auth.repository.PasswordResetTokenRepository;
 import wallet.api.domain.user.entity.User;
 import wallet.api.domain.user.repository.UserRepository;
 import wallet.api.errors.auth.InvalidResetTokenError;

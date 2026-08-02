@@ -1,4 +1,4 @@
-package wallet.api.domain.auth;
+package wallet.api.domain.auth.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -12,11 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import wallet.api.domain.category.dtos.CategoryToApiViewDTO;
+import wallet.api.domain.transaction.dto.ClassificationResultDTO;
+import wallet.api.domain.transaction.dto.ClassifyTransactionsDTO;
 import wallet.api.domain.transaction.dto.CreateTransactionDTO;
 import wallet.api.domain.transaction.dto.ImportResultDTO;
 import wallet.api.domain.transaction.dto.ImportTransactionsDTO;
 import wallet.api.domain.transaction.dto.TransactionToApiViewDTO;
 import wallet.api.domain.transaction.dto.UpdateTransactionDTO;
+import wallet.api.domain.transaction.service.TransactionClassificationService;
 import wallet.api.domain.transaction.service.TransactionService;
 import wallet.api.domain.user.entity.User;
 
@@ -30,8 +33,11 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
-    public TransactionController(TransactionService transactionService) {
+    private final TransactionClassificationService transactionClassificationService;
+
+    public TransactionController(TransactionService transactionService, TransactionClassificationService transactionClassificationService) {
         this.transactionService = transactionService;
+        this.transactionClassificationService = transactionClassificationService;
     }
 
     @PostMapping
@@ -64,6 +70,18 @@ public class TransactionController {
         var result = this.transactionService.importTransactions(user, body);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
+
+    @PostMapping("/classify")
+    @Operation(summary = "Suggest categories with AI", description = "Sends the descriptions to Gemini and returns a suggested category per item, chosen only among the allowed categories (all of them when categoryIds is omitted). Items below the confidence threshold are left out, so the caller keeps them uncategorized. Nothing is persisted.")
+    @ApiResponse(responseCode = "200", description = "Suggestions returned")
+    @ApiResponse(responseCode = "400", description = "Validation error")
+    @ApiResponse(responseCode = "404", description = "Category not found")
+    @ApiResponse(responseCode = "429", description = "Rate limited, see the Retry-After header")
+    @ApiResponse(responseCode = "502", description = "Classification provider failed")
+    @ApiResponse(responseCode = "503", description = "Classification is not configured")
+    public ResponseEntity<ClassificationResultDTO> classifyTransactions(@AuthenticationPrincipal User user, @RequestBody @Valid ClassifyTransactionsDTO body) {
+        return ResponseEntity.ok(this.transactionClassificationService.classify(user, body));
     }
 
     @PatchMapping("/{id}")

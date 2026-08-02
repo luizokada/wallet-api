@@ -5,16 +5,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import wallet.api.domain.auth.AuthTOAPIView;
-import wallet.api.domain.auth.LoginAuthDTO;
-import wallet.api.domain.user.entity.User;
-import wallet.api.infra.jwt.JWTService;
+import wallet.api.domain.auth.dtos.AuthToApiViewDTO;
+import wallet.api.domain.auth.dtos.LoginAuthDTO;
+import wallet.api.domain.auth.service.AuthService;
 import wallet.api.infra.security.annotations.PublicRoute;
 
 @RestController
@@ -22,13 +19,10 @@ import wallet.api.infra.security.annotations.PublicRoute;
 @Tag(name = "Authentication", description = "Endpoints for user authentication and JWT token generation")
 public class AuthController {
 
-    private final AuthenticationManager manager;
+    private final AuthService authService;
 
-    private final JWTService tokenService;
-
-    public AuthController(AuthenticationManager manager, JWTService tokenService) {
-        this.manager = manager;
-        this.tokenService = tokenService;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
     @PostMapping
@@ -36,11 +30,7 @@ public class AuthController {
     @Operation(summary = "Login", description = "Authenticates the user with email and password and returns a JWT token.")
     @ApiResponse(responseCode = "200", description = "Authenticated, returns user id, name and JWT token")
     @ApiResponse(responseCode = "401", description = "Invalid email or password")
-    public ResponseEntity<AuthTOAPIView> login(@RequestBody @Valid LoginAuthDTO loginAuthDTO) {
-        var token = new UsernamePasswordAuthenticationToken(loginAuthDTO.email(), loginAuthDTO.password());
-        var auth = manager.authenticate(token);
-        var logedUser = (User) auth.getPrincipal();
-        var jwtToken = tokenService.createToken(logedUser);
-        return ResponseEntity.ok(new AuthTOAPIView(logedUser.getId(), logedUser.getName(), jwtToken));
+    public ResponseEntity<AuthToApiViewDTO> login(@RequestBody @Valid LoginAuthDTO loginAuthDTO) {
+        return ResponseEntity.ok(authService.login(loginAuthDTO));
     }
 }

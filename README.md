@@ -72,6 +72,12 @@ SUPABASE_BUCKET_ACCESS_KEY=your-s3-access-key
 SUPABASE_BUCKET_SECRET_KEY=your-s3-secret-key
 SUPABASE_S3_ENDPOINT=https://your-project.supabase.co/storage/v1/s3
 SUPABASE_S3_REGION=us-east-1
+
+# Gemini (automatic category suggestion for imported statements)
+# Without the key the API still works: /transaction/classify answers 503
+GOOGLE_GEMINI_API_KEY=your-gemini-api-key
+GEMINI_MODEL=gemini-3.5-flash-lite
+GEMINI_MIN_CONFIDENCE=0.7
 ```
 
 ### Variable Description
@@ -91,6 +97,9 @@ SUPABASE_S3_REGION=us-east-1
 | `SUPABASE_BUCKET_SECRET_KEY` | S3 secret key (Storage > S3 Connection)  | `a65c4ce8...`                                              |
 | `SUPABASE_S3_ENDPOINT`       | S3-compatible endpoint of the project    | `https://xxx.supabase.co/storage/v1/s3`                    |
 | `SUPABASE_S3_REGION`         | Project region, used to sign the request | `us-east-1`                                                |
+| `GOOGLE_GEMINI_API_KEY`      | Key for the category suggestion feature  | `AIza...`                                                  |
+| `GEMINI_MODEL`               | Model used to classify statement lines   | `gemini-3.5-flash-lite`                                    |
+| `GEMINI_MIN_CONFIDENCE`      | Below this, the item is left uncategorized | `0.7`                                                    |
 
 ## 🚀 How to Run the Project
 

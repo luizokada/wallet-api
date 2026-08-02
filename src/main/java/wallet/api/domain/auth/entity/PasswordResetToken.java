@@ -1,4 +1,4 @@
-package wallet.api.domain.auth;
+package wallet.api.domain.auth.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

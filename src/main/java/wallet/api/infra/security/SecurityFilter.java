@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import wallet.api.domain.auth.AuthRepository;
+import wallet.api.domain.auth.repository.AuthRepository;
 import wallet.api.errors.auth.InvalidTokenError;
 import wallet.api.errors.auth.NoTokenError;
 import wallet.api.infra.jwt.JWTService;
