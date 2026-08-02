@@ -12,6 +12,7 @@ import wallet.api.domain.user.entity.User;
 import wallet.api.errors.category.CategoryNotFound;
 import wallet.api.errors.transaction.CategoryTypeMismatchError;
 import wallet.api.errors.transaction.NoWalletFound;
+import wallet.api.errors.transaction.NotTransactionOwnerError;
 import wallet.api.errors.transaction.TransactionNotFound;
 
 @Service
@@ -84,11 +85,15 @@ public class TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    public void deleteTransaction(String id) {
+    public void deleteTransaction(String id, User currentUser) {
         Transaction transaction = transactionRepository.findTransactionById(id);
 
         if (transaction == null) {
             throw new TransactionNotFound();
+        }
+
+        if (!transaction.getWallet().getUser().getId().equals(currentUser.getId())) {
+            throw new NotTransactionOwnerError();
         }
 
         transactionRepository.delete(transaction);

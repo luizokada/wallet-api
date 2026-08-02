@@ -17,8 +17,6 @@ import wallet.api.domain.user.service.UserService;
 import wallet.api.errors.user.NotResourceOwnerError;
 import wallet.api.infra.security.annotations.PublicRoute;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("user")
 @Tag(name = "user", description = "User endpoints")
@@ -68,13 +66,15 @@ public class UserController {
         return ResponseEntity.ok().body(new UserToApiViewDTO(updatedUser)) ;
     }
 
-    @GetMapping
-    @Operation(summary = "List users", description = "Lists all non-deleted users.")
-    @ApiResponse(responseCode = "200", description = "List of users")
-    public ResponseEntity<List<UserToApiViewDTO>> getAllUsers(){
-        List<User> users = userService.listUser();
-        return ResponseEntity.ok().body(UserToApiViewDTO.toList(users)) ;
-    }
+    // Rota desativada: listar todos os usuários expõe dados pessoais (email, document, birthday)
+    // e só faria sentido para admins — sem plano de roles/admin por enquanto.
+    // @GetMapping
+    // @Operation(summary = "List users", description = "Lists all non-deleted users.")
+    // @ApiResponse(responseCode = "200", description = "List of users")
+    // public ResponseEntity<List<UserToApiViewDTO>> getAllUsers(){
+    //     List<User> users = userService.listUser();
+    //     return ResponseEntity.ok().body(UserToApiViewDTO.toList(users)) ;
+    // }
 
     @DeleteMapping("/{id}")
     @Transactional

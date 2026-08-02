@@ -68,11 +68,12 @@ public class TransactionController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete transaction", description = "Deletes a transaction by id.")
+    @Operation(summary = "Delete transaction", description = "Deletes a transaction by id. Only the owner of the transaction's wallet can delete it.")
     @ApiResponse(responseCode = "200", description = "Transaction deleted")
+    @ApiResponse(responseCode = "403", description = "Transaction belongs to another user")
     @ApiResponse(responseCode = "404", description = "Transaction not found")
-    public ResponseEntity<Void> deleteTransaction(@PathVariable String id) {
-        transactionService.deleteTransaction(id);
+    public ResponseEntity<Void> deleteTransaction(@AuthenticationPrincipal User user, @PathVariable String id) {
+        transactionService.deleteTransaction(id, user);
 
         return ResponseEntity.ok().build();
     }

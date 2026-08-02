@@ -16,6 +16,8 @@ import wallet.api.domain.user.entity.User;
 import wallet.api.domain.wallet.entity.Wallet;
 import wallet.api.errors.transaction.CategoryTypeMismatchError;
 import wallet.api.errors.transaction.NoWalletFound;
+import wallet.api.errors.transaction.NotTransactionOwnerError;
+import wallet.api.errors.transaction.TransactionNotFound;
 
 import java.util.Date;
 import java.util.Optional;
@@ -120,5 +122,37 @@ class TransactionServiceTest {
 
         assertEquals(TransactionType.INCOME, updated.getType());
         assertEquals(incomeCategory, updated.getCategory());
+    }
+
+    @Test
+    void deleteShouldRemoveTransactionWhenUserIsOwner() {
+        var existing = new Transaction(wallet, null,
+                new CreateTransactionDTO(TransactionType.EXPENSE, new Date(), "mercado", 3000, null));
+        when(transactionRepository.findTransactionById("t-1")).thenReturn(existing);
+
+        transactionService.deleteTransaction("t-1", user);
+
+        verify(transactionRepository).delete(existing);
+    }
+
+    @Test
+    void deleteShouldRejectWhenUserIsNotOwner() {
+        var existing = new Transaction(wallet, null,
+                new CreateTransactionDTO(TransactionType.EXPENSE, new Date(), "mercado", 3000, null));
+        when(transactionRepository.findTransactionById("t-1")).thenReturn(existing);
+        var otherUser = new User("other-id", "Other User", "other@example.com", "hash", null, null, null, null);
+
+        assertThrows(NotTransactionOwnerError.class,
+                () -> transactionService.deleteTransaction("t-1", otherUser));
+
+        verify(transactionRepository, never()).delete(any());
+    }
+
+    @Test
+    void deleteShouldThrowWhenTransactionNotFound() {
+        when(transactionRepository.findTransactionById("missing")).thenReturn(null);
+
+        assertThrows(TransactionNotFound.class,
+                () -> transactionService.deleteTransaction("missing", user));
     }
 }
