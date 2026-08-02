@@ -8,9 +8,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import wallet.api.domain.category.entity.Category;
 import wallet.api.domain.transaction.dto.CreateTransactionDTO;
+import wallet.api.domain.transaction.dto.ImportTransactionItemDTO;
 import wallet.api.domain.transaction.dto.UpdateTransactionDTO;
 import wallet.api.domain.wallet.entity.Wallet;
 
+import java.time.ZoneId;
 import java.util.Date;
 
 @Table(name = "transactions")
@@ -40,6 +42,14 @@ public class Transaction {
     @Column(name = "expense_date")
     private Date date;
 
+    @Column(name = "installment_number")
+    private Integer installmentNumber;
+    @Column(name = "installment_total")
+    private Integer installmentTotal;
+
+    @Column(name = "series_id")
+    private String seriesId;
+
     @JsonManagedReference
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "category_id")
@@ -62,6 +72,21 @@ public class Transaction {
             this.description = body.description();
         }
 
+    }
+
+    public Transaction(Wallet wallet, Category category, ImportTransactionItemDTO item) {
+        this.wallet = wallet;
+        this.category = category;
+        this.type = item.type();
+        this.date = Date.from(item.date().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.amount = item.amount();
+        this.description = item.description();
+        this.installmentNumber = item.installmentNumber();
+        this.installmentTotal = item.installmentTotal();
+        this.seriesId = item.seriesId();
+        if (category != null) {
+            this.categoryId = category.getId();
+        }
     }
 
     public void update(UpdateTransactionDTO payload, Category category) {

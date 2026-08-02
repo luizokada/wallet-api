@@ -16,7 +16,7 @@ public interface WalletRepository extends JpaRepository<Wallet,String> {
     @Query("select t from Transaction t where t.walletId = ?1 and t.date between ?2 and ?3")
     public List<Transaction> findTransactionsByDate(String walletId, Date startDate, Date endDate);
 
-    @Query("select coalesce(sum(case when t.type = ?2 then t.amount else -t.amount end), 0L) from Transaction t where t.walletId = ?1")
+    @Query("select coalesce(sum(case when t.type = ?2 then t.amount else -t.amount end), 0L) from Transaction t where t.walletId = ?1 and t.date <= CURRENT_DATE")
     public Long calculateBalance(String walletId, TransactionType incomeType);
 
 }

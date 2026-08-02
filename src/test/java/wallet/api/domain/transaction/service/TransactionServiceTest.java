@@ -8,6 +8,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import wallet.api.domain.category.entity.Category;
 import wallet.api.domain.category.repository.CategoryRepository;
 import wallet.api.domain.transaction.dto.CreateTransactionDTO;
+import wallet.api.domain.transaction.dto.ImportTransactionItemDTO;
+import wallet.api.domain.transaction.dto.ImportTransactionsDTO;
 import wallet.api.domain.transaction.dto.UpdateTransactionDTO;
 import wallet.api.domain.transaction.entity.Transaction;
 import wallet.api.domain.transaction.entity.TransactionType;
@@ -17,15 +19,20 @@ import wallet.api.domain.wallet.entity.Wallet;
 import wallet.api.errors.transaction.CategoryTypeMismatchError;
 import wallet.api.errors.transaction.NoWalletFound;
 import wallet.api.errors.transaction.NotTransactionOwnerError;
+import wallet.api.errors.category.CategoryNotFound;
 import wallet.api.errors.transaction.TransactionNotFound;
 
+import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -154,5 +161,173 @@ class TransactionServiceTest {
 
         assertThrows(TransactionNotFound.class,
                 () -> transactionService.deleteTransaction("missing", user));
+    }
+
+    private ImportTransactionItemDTO importItem(String description, int amount, String categoryId) {
+        return new ImportTransactionItemDTO(TransactionType.EXPENSE, LocalDate.of(2026, 7, 15),
+                description, amount, categoryId, null, null, null);
+    }
+
+    private ImportTransactionItemDTO installmentItem(int number, int total, String seriesId) {
+        return new ImportTransactionItemDTO(TransactionType.EXPENSE, LocalDate.of(2026, 7, 15),
+                "Netshoes", 12990, null, number, total, seriesId);
+    }
+
+    private void givenWalletWithoutTransactions() {
+        when(transactionRepository.findWalletByUserId("user-id")).thenReturn(wallet);
+        when(transactionRepository.findByWalletIdAndDateBetween(any(), any(), any())).thenReturn(List.of());
+        when(transactionRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
+    }
+
+    @Test
+    void importShouldCreateEveryItemWhenThereAreNoDuplicates() {
+        givenWalletWithoutTransactions();
+
+        var payload = new ImportTransactionsDTO(List.of(
+                importItem("IFOOD", 4590, null),
+                importItem("UBER", 2100, null),
+                importItem("NETFLIX", 5590, null)
+        ), null);
+
+        var result = transactionService.importTransactions(user, payload);
+
+        assertEquals(3, result.created());
+        assertEquals(0, result.skipped());
+        assertEquals(3, result.transactions().size());
+    }
+
+    @Test
+    void importShouldThrowWhenUserHasNoWallet() {
+        when(transactionRepository.findWalletByUserId("user-id")).thenReturn(null);
+
+        var payload = new ImportTransactionsDTO(List.of(importItem("IFOOD", 4590, null)), null);
+
+        assertThrows(NoWalletFound.class, () -> transactionService.importTransactions(user, payload));
+
+        verify(transactionRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    void importShouldThrowWhenCategoryDoesNotExist() {
+        when(transactionRepository.findWalletByUserId("user-id")).thenReturn(wallet);
+        when(categoryRepository.findAllById(anyList())).thenReturn(List.of());
+
+        var payload = new ImportTransactionsDTO(List.of(importItem("IFOOD", 4590, "missing-cat")), null);
+
+        assertThrows(CategoryNotFound.class, () -> transactionService.importTransactions(user, payload));
+
+        verify(transactionRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    void importShouldRejectCategoryOfDifferentType() {
+        when(transactionRepository.findWalletByUserId("user-id")).thenReturn(wallet);
+        when(categoryRepository.findAllById(anyList())).thenReturn(List.of(incomeCategory));
+        when(transactionRepository.findByWalletIdAndDateBetween(any(), any(), any())).thenReturn(List.of());
+
+        var payload = new ImportTransactionsDTO(List.of(importItem("IFOOD", 4590, "cat-income")), null);
+
+        assertThrows(CategoryTypeMismatchError.class, () -> transactionService.importTransactions(user, payload));
+
+        verify(transactionRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    void importShouldLoadCategoriesInASingleQuery() {
+        givenWalletWithoutTransactions();
+        when(categoryRepository.findAllById(anyList())).thenReturn(List.of(expenseCategory));
+
+        var payload = new ImportTransactionsDTO(List.of(
+                importItem("MERCADO A", 4590, "cat-expense"),
+                importItem("MERCADO B", 7100, "cat-expense")
+        ), null);
+
+        transactionService.importTransactions(user, payload);
+
+        verify(categoryRepository, times(1)).findAllById(anyList());
+        verify(categoryRepository, never()).findById(any());
+    }
+
+    @Test
+    void importShouldSkipItemAlreadyPresentInTheWallet() {
+        var alreadySaved = new Transaction(wallet, null, importItem("IFOOD", 4590, null));
+        when(transactionRepository.findWalletByUserId("user-id")).thenReturn(wallet);
+        when(transactionRepository.findByWalletIdAndDateBetween(any(), any(), any()))
+                .thenReturn(List.of(alreadySaved));
+        when(transactionRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
+
+        var payload = new ImportTransactionsDTO(List.of(
+                importItem("IFOOD", 4590, null),
+                importItem("UBER", 2100, null)
+        ), null);
+
+        var result = transactionService.importTransactions(user, payload);
+
+        assertEquals(1, result.created());
+        assertEquals(1, result.skipped());
+        assertEquals("IFOOD", result.duplicates().getFirst().description());
+    }
+
+    @Test
+    void importShouldSkipDuplicateInsideTheSameBatch() {
+        givenWalletWithoutTransactions();
+
+        var payload = new ImportTransactionsDTO(List.of(
+                importItem("IFOOD", 4590, null),
+                importItem("IFOOD", 4590, null)
+        ), null);
+
+        var result = transactionService.importTransactions(user, payload);
+
+        assertEquals(1, result.created());
+        assertEquals(1, result.skipped());
+    }
+
+    @Test
+    void importShouldTreatDifferentInstallmentNumbersAsDistinctTransactions() {
+        givenWalletWithoutTransactions();
+
+        var payload = new ImportTransactionsDTO(List.of(
+                installmentItem(3, 10, "series-1"),
+                installmentItem(4, 10, "series-1")
+        ), null);
+
+        var result = transactionService.importTransactions(user, payload);
+
+        assertEquals(2, result.created());
+        assertEquals(0, result.skipped());
+    }
+
+    @Test
+    void importShouldIgnoreSeriesIdWhenDetectingDuplicates() {
+        var projectedLastMonth = new Transaction(wallet, null, installmentItem(4, 10, "series-from-july"));
+        when(transactionRepository.findWalletByUserId("user-id")).thenReturn(wallet);
+        when(transactionRepository.findByWalletIdAndDateBetween(any(), any(), any()))
+                .thenReturn(List.of(projectedLastMonth));
+        when(transactionRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
+
+        var payload = new ImportTransactionsDTO(List.of(installmentItem(4, 10, "series-from-august")), null);
+
+        var result = transactionService.importTransactions(user, payload);
+
+        assertEquals(0, result.created());
+        assertEquals(1, result.skipped());
+    }
+
+    @Test
+    void importShouldCreateDuplicatesWhenSkipIsDisabled() {
+        when(transactionRepository.findWalletByUserId("user-id")).thenReturn(wallet);
+        when(transactionRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
+
+        var payload = new ImportTransactionsDTO(List.of(
+                importItem("IFOOD", 4590, null),
+                importItem("IFOOD", 4590, null)
+        ), false);
+
+        var result = transactionService.importTransactions(user, payload);
+
+        assertEquals(2, result.created());
+        assertEquals(0, result.skipped());
+        verify(transactionRepository, never()).findByWalletIdAndDateBetween(any(), any(), any());
     }
 }

@@ -13,7 +13,9 @@ public record TransactionToApiViewDTO(
         String description,
         int amount,
         Date date,
-        CategoryToApiViewDTO category
+        CategoryToApiViewDTO category,
+        Integer installmentNumber,
+        Integer installmentTotal
 ) {
 
     public static List<TransactionToApiViewDTO> fromList(List<Transaction> transactions) {
@@ -29,6 +31,6 @@ public record TransactionToApiViewDTO(
 
     public TransactionToApiViewDTO(Transaction transaction, CategoryToApiViewDTO category) {
 
-        this(transaction.getId(), transaction.getType(), transaction.getDescription(), transaction.getAmount(), transaction.getDate(), category);
+        this(transaction.getId(), transaction.getType(), transaction.getDescription(), transaction.getAmount(), transaction.getDate(), category, transaction.getInstallmentNumber(), transaction.getInstallmentTotal());
     }
 }
