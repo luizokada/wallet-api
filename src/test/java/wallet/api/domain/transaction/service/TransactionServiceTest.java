@@ -2,9 +2,12 @@ package wallet.api.domain.transaction.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import wallet.api.domain.category.entity.Category;
 import wallet.api.domain.category.repository.CategoryRepository;
 import wallet.api.domain.transaction.dto.CreateTransactionDTO;
@@ -31,6 +34,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -56,7 +61,7 @@ class TransactionServiceTest {
     @Test
     void createShouldSaveIncomeWithMatchingCategory() {
         when(transactionRepository.findWalletByUserId("user-id")).thenReturn(wallet);
-        when(categoryRepository.findById("cat-income")).thenReturn(Optional.of(incomeCategory));
+        when(categoryRepository.findVisibleById("user-id", "cat-income")).thenReturn(Optional.of(incomeCategory));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(inv -> inv.getArgument(0));
 
         var dto = new CreateTransactionDTO(TransactionType.INCOME, new Date(), "Salário do mês", 500000, "cat-income");
@@ -70,11 +75,23 @@ class TransactionServiceTest {
     @Test
     void createShouldRejectCategoryOfDifferentType() {
         when(transactionRepository.findWalletByUserId("user-id")).thenReturn(wallet);
-        when(categoryRepository.findById("cat-expense")).thenReturn(Optional.of(expenseCategory));
+        when(categoryRepository.findVisibleById("user-id", "cat-expense")).thenReturn(Optional.of(expenseCategory));
 
         var dto = new CreateTransactionDTO(TransactionType.INCOME, new Date(), "x", 100, "cat-expense");
 
         assertThrows(CategoryTypeMismatchError.class, () -> transactionService.createTransaction(user, dto));
+
+        verify(transactionRepository, never()).save(any());
+    }
+
+    @Test
+    void createShouldRejectCategoryOfAnotherUser() {
+        when(transactionRepository.findWalletByUserId("user-id")).thenReturn(wallet);
+        when(categoryRepository.findVisibleById("user-id", "cat-from-other-user")).thenReturn(Optional.empty());
+
+        var dto = new CreateTransactionDTO(TransactionType.EXPENSE, new Date(), "x", 100, "cat-from-other-user");
+
+        assertThrows(CategoryNotFound.class, () -> transactionService.createTransaction(user, dto));
 
         verify(transactionRepository, never()).save(any());
     }
@@ -97,7 +114,7 @@ class TransactionServiceTest {
         var transaction = transactionService.createTransaction(user, dto);
 
         assertEquals(TransactionType.EXPENSE, transaction.getType());
-        verify(categoryRepository, never()).findById(any());
+        verify(categoryRepository, never()).findVisibleById(any(), any());
     }
 
     @Test
@@ -121,7 +138,7 @@ class TransactionServiceTest {
                 new CreateTransactionDTO(TransactionType.EXPENSE, new Date(), "mercado", 3000, "cat-expense"));
         when(transactionRepository.findTransactionById("t-1")).thenReturn(existing);
         when(transactionRepository.findWalletByUserId("user-id")).thenReturn(wallet);
-        when(categoryRepository.findById("cat-income")).thenReturn(Optional.of(incomeCategory));
+        when(categoryRepository.findVisibleById("user-id", "cat-income")).thenReturn(Optional.of(incomeCategory));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(inv -> inv.getArgument(0));
 
         var payload = new UpdateTransactionDTO(TransactionType.INCOME, null, null, null, "cat-income");
@@ -129,6 +146,22 @@ class TransactionServiceTest {
 
         assertEquals(TransactionType.INCOME, updated.getType());
         assertEquals(incomeCategory, updated.getCategory());
+    }
+
+    @Test
+    void updateShouldRejectCategoryOfAnotherUser() {
+        var existing = new Transaction(wallet, expenseCategory,
+                new CreateTransactionDTO(TransactionType.EXPENSE, new Date(), "mercado", 3000, "cat-expense"));
+        when(transactionRepository.findTransactionById("t-1")).thenReturn(existing);
+        when(transactionRepository.findWalletByUserId("user-id")).thenReturn(wallet);
+        when(categoryRepository.findVisibleById("user-id", "cat-from-other-user")).thenReturn(Optional.empty());
+
+        var payload = new UpdateTransactionDTO(null, null, null, null, "cat-from-other-user");
+
+        assertThrows(CategoryNotFound.class,
+                () -> transactionService.updateTransaction("t-1", user, payload));
+
+        verify(transactionRepository, never()).save(any());
     }
 
     @Test
@@ -210,7 +243,7 @@ class TransactionServiceTest {
     @Test
     void importShouldThrowWhenCategoryDoesNotExist() {
         when(transactionRepository.findWalletByUserId("user-id")).thenReturn(wallet);
-        when(categoryRepository.findAllById(anyList())).thenReturn(List.of());
+        when(categoryRepository.findAllVisibleByIdIn(anyString(), anyList())).thenReturn(List.of());
 
         var payload = new ImportTransactionsDTO(List.of(importItem("IFOOD", 4590, "missing-cat")), null);
 
@@ -220,9 +253,22 @@ class TransactionServiceTest {
     }
 
     @Test
+    void importShouldThrowWhenCategoryBelongsToAnotherUser() {
+        when(transactionRepository.findWalletByUserId("user-id")).thenReturn(wallet);
+        when(categoryRepository.findAllVisibleByIdIn(anyString(), anyList())).thenReturn(List.of());
+
+        var payload = new ImportTransactionsDTO(List.of(importItem("IFOOD", 4590, "cat-from-other-user")), null);
+
+        assertThrows(CategoryNotFound.class, () -> transactionService.importTransactions(user, payload));
+
+        verify(categoryRepository).findAllVisibleByIdIn(eq("user-id"), anyList());
+        verify(transactionRepository, never()).saveAll(anyList());
+    }
+
+    @Test
     void importShouldRejectCategoryOfDifferentType() {
         when(transactionRepository.findWalletByUserId("user-id")).thenReturn(wallet);
-        when(categoryRepository.findAllById(anyList())).thenReturn(List.of(incomeCategory));
+        when(categoryRepository.findAllVisibleByIdIn(anyString(), anyList())).thenReturn(List.of(incomeCategory));
         when(transactionRepository.findByWalletIdAndDateBetween(any(), any(), any())).thenReturn(List.of());
 
         var payload = new ImportTransactionsDTO(List.of(importItem("IFOOD", 4590, "cat-income")), null);
@@ -235,7 +281,7 @@ class TransactionServiceTest {
     @Test
     void importShouldLoadCategoriesInASingleQuery() {
         givenWalletWithoutTransactions();
-        when(categoryRepository.findAllById(anyList())).thenReturn(List.of(expenseCategory));
+        when(categoryRepository.findAllVisibleByIdIn(anyString(), anyList())).thenReturn(List.of(expenseCategory));
 
         var payload = new ImportTransactionsDTO(List.of(
                 importItem("MERCADO A", 4590, "cat-expense"),
@@ -244,8 +290,8 @@ class TransactionServiceTest {
 
         transactionService.importTransactions(user, payload);
 
-        verify(categoryRepository, times(1)).findAllById(anyList());
-        verify(categoryRepository, never()).findById(any());
+        verify(categoryRepository, times(1)).findAllVisibleByIdIn(eq("user-id"), anyList());
+        verify(categoryRepository, never()).findVisibleById(any(), any());
     }
 
     @Test
@@ -329,5 +375,38 @@ class TransactionServiceTest {
         assertEquals(2, result.created());
         assertEquals(0, result.skipped());
         verify(transactionRepository, never()).findByWalletIdAndDateBetween(any(), any(), any());
+    }
+
+    @Test
+    void listShouldOnlyReadTheWalletOfTheAuthenticatedUser() {
+        when(transactionRepository.findWalletByUserId("user-id")).thenReturn(wallet);
+        when(transactionRepository.findPageByWalletId(eq(wallet.getId()), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        transactionService.listByUser(user, 0, 50);
+
+        verify(transactionRepository).findPageByWalletId(eq(wallet.getId()), any(Pageable.class));
+    }
+
+    @Test
+    void listShouldForwardPageAndSizeToTheRepository() {
+        var pageable = ArgumentCaptor.forClass(Pageable.class);
+        when(transactionRepository.findWalletByUserId("user-id")).thenReturn(wallet);
+        when(transactionRepository.findPageByWalletId(any(), pageable.capture()))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        transactionService.listByUser(user, 3, 25);
+
+        assertEquals(3, pageable.getValue().getPageNumber());
+        assertEquals(25, pageable.getValue().getPageSize());
+    }
+
+    @Test
+    void listShouldThrowWhenUserHasNoWallet() {
+        when(transactionRepository.findWalletByUserId("user-id")).thenReturn(null);
+
+        assertThrows(NoWalletFound.class, () -> transactionService.listByUser(user, 0, 50));
+
+        verify(transactionRepository, never()).findPageByWalletId(any(), any());
     }
 }

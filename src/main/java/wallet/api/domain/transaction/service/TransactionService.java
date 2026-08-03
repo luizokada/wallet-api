@@ -1,5 +1,7 @@
 package wallet.api.domain.transaction.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import wallet.api.domain.category.entity.Category;
 import wallet.api.domain.category.repository.CategoryRepository;
@@ -51,7 +53,7 @@ public class TransactionService {
 
         Category category = null;
         if (payload.categoryId() != null) {
-            category = categoryRepository.findById(payload.categoryId()).orElse(null);
+            category = categoryRepository.findVisibleById(currentUser.getId(), payload.categoryId()).orElse(null);
 
             if (category == null) {
                 throw new CategoryNotFound();
@@ -72,7 +74,7 @@ public class TransactionService {
             throw new NoWalletFound();
         }
 
-        var categoriesById = loadCategories(payload.transactions());
+        var categoriesById = loadCategories(currentUser, payload.transactions());
         var skipDuplicates = payload.shouldSkipDuplicates();
         var knownKeys = skipDuplicates
                 ? loadExistingKeys(wallet.getId(), payload.transactions())
@@ -102,7 +104,7 @@ public class TransactionService {
         );
     }
 
-    private Map<String, Category> loadCategories(List<ImportTransactionItemDTO> items) {
+    private Map<String, Category> loadCategories(User currentUser, List<ImportTransactionItemDTO> items) {
         var ids = items.stream()
                 .map(ImportTransactionItemDTO::categoryId)
                 .filter(id -> id != null && !id.isBlank())
@@ -113,7 +115,7 @@ public class TransactionService {
             return Map.of();
         }
 
-        var found = categoryRepository.findAllById(ids).stream()
+        var found = categoryRepository.findAllVisibleByIdIn(currentUser.getId(), ids).stream()
                 .collect(Collectors.toMap(Category::getId, category -> category));
 
         if (found.size() != ids.size()) {
@@ -205,7 +207,7 @@ public class TransactionService {
         }
         Category newCategory = null;
         if (payload.categoryId() != null && !payload.categoryId().isEmpty()) {
-            newCategory = categoryRepository.findById(payload.categoryId()).orElse(null);
+            newCategory = categoryRepository.findVisibleById(currentUser.getId(), payload.categoryId()).orElse(null);
 
             if (newCategory == null) {
                 throw new CategoryNotFound();
@@ -247,6 +249,16 @@ public class TransactionService {
         }
 
         return transaction;
+    }
+
+    public Page<Transaction> listByUser(User currentUser, int page, int size) {
+        var wallet = transactionRepository.findWalletByUserId(currentUser.getId());
+
+        if (wallet == null) {
+            throw new NoWalletFound();
+        }
+
+        return transactionRepository.findPageByWalletId(wallet.getId(), PageRequest.of(page, size));
     }
 
 }

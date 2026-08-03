@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.BAD_REQUEST , reason = "No token provided")
 public class NoTokenError extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+
     public NoTokenError() {
         super("No token provided");
     }

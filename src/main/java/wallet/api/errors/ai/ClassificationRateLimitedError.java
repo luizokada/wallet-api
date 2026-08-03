@@ -1,6 +1,8 @@
 package wallet.api.errors.ai;
 
 public class ClassificationRateLimitedError extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+
 
     private final long retryAfterSeconds;
 

@@ -1,5 +1,7 @@
 package wallet.api.infra.exceptions;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -16,6 +18,14 @@ public class ErrorHandler {
     public ResponseEntity<Object> handleBadRequestError(MethodArgumentNotValidException e) {
         var errorList = e.getFieldErrors();
         return ResponseEntity.badRequest().body(errorList.stream().map(BadRequestValidationErrors::new));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Object> handleConstraintViolationError(ConstraintViolationException e) {
+        var errorList = e.getConstraintViolations().stream()
+                .map(BadRequestValidationErrors::new)
+                .toList();
+        return ResponseEntity.badRequest().body(errorList);
     }
 
     @ExceptionHandler(AuthenticationException.class)
@@ -41,6 +51,15 @@ public class ErrorHandler {
     private record BadRequestValidationErrors(String field, String msg) {
         public BadRequestValidationErrors(FieldError error) {
             this(error.getField(), error.getDefaultMessage());
+        }
+
+        public BadRequestValidationErrors(ConstraintViolation<?> violation) {
+            this(lastPathSegment(violation.getPropertyPath().toString()), violation.getMessage());
+        }
+
+        private static String lastPathSegment(String propertyPath) {
+            var separator = propertyPath.lastIndexOf('.');
+            return separator < 0 ? propertyPath : propertyPath.substring(separator + 1);
         }
     }
 

@@ -9,11 +9,12 @@ public record CategoryToApiViewDTO(
         String id,
         String name,
         String description,
-        TransactionType type
+        TransactionType type,
+        boolean isDefault
 ) {
 
     public CategoryToApiViewDTO(Category category) {
-        this(category.getId(), category.getName(), category.getDescription(), category.getType());
+        this(category.getId(), category.getName(), category.getDescription(), category.getType(), category.isDefault());
     }
 
     public static List<CategoryToApiViewDTO> toList(List<Category> categories) {

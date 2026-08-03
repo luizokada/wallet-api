@@ -1,7 +1,6 @@
 # Docker Compose para Wallet API
 # Inclui banco de dados PostgreSQL e a aplicação Spring Boot
 
-version: "3.9"
 services:
   postgres:
     container_name: postgres_wallet

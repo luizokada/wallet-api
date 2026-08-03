@@ -1,6 +1,6 @@
 package wallet.api.domain.transaction.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import wallet.api.domain.category.entity.Category;
@@ -42,11 +42,8 @@ public class TransactionClassificationService {
                     "properties", Map.of(
                             "index", Map.of("type", "INTEGER"),
                             "categoryName", Map.of("type", "STRING"),
-                            "confidence", Map.of("type", "NUMBER")
-                    ),
-                    "required", List.of("index", "categoryName", "confidence")
-            )
-    );
+                            "confidence", Map.of("type", "NUMBER")),
+                    "required", List.of("index", "categoryName", "confidence")));
 
     private final CategoryRepository categoryRepository;
     private final GeminiClient geminiClient;
@@ -58,8 +55,7 @@ public class TransactionClassificationService {
     public TransactionClassificationService(
             CategoryRepository categoryRepository,
             GeminiClient geminiClient,
-            ClassificationRateLimiter rateLimiter
-    ) {
+            ClassificationRateLimiter rateLimiter) {
         this.categoryRepository = categoryRepository;
         this.geminiClient = geminiClient;
         this.rateLimiter = rateLimiter;
@@ -68,7 +64,7 @@ public class TransactionClassificationService {
     public ClassificationResultDTO classify(User currentUser, ClassifyTransactionsDTO payload) {
         rateLimiter.checkAndRegister(currentUser.getId());
 
-        var allowedCategories = loadAllowedCategories(payload.categoryIds());
+        var allowedCategories = loadAllowedCategories(currentUser.getId(), payload.categoryIds());
         var classifiedItems = new ArrayList<ClassificationResultDTO.ClassifiedItemDTO>();
 
         for (var type : TransactionType.values()) {
@@ -91,14 +87,12 @@ public class TransactionClassificationService {
         return new ClassificationResultDTO(
                 classifiedItems.size(),
                 payload.items().size() - classifiedItems.size(),
-                classifiedItems
-        );
+                classifiedItems);
     }
 
     private List<ClassificationResultDTO.ClassifiedItemDTO> classifyGroup(
             List<ClassifyItemDTO> items,
-            List<Category> categories
-    ) {
+            List<Category> categories) {
         var uniqueDescriptions = new ArrayList<String>();
         var descriptionPositions = new LinkedHashMap<String, List<Integer>>();
 
@@ -113,7 +107,8 @@ public class TransactionClassificationService {
 
         var suggestionsByPosition = askGemini(uniqueDescriptions, categories);
         var categoriesByName = categories.stream()
-                .collect(Collectors.toMap(category -> normalize(category.getName()), category -> category, (first, second) -> first));
+                .collect(Collectors.toMap(category -> normalize(category.getName()), category -> category,
+                        (first, second) -> first));
 
         var results = new ArrayList<ClassificationResultDTO.ClassifiedItemDTO>();
         var positions = new ArrayList<>(descriptionPositions.values());
@@ -159,7 +154,7 @@ public class TransactionClassificationService {
         }
 
         for (JsonNode node : response) {
-            var categoryName = node.path("categoryName").asText("");
+            var categoryName = node.path("categoryName").asString("");
             if (categoryName.isBlank()) {
                 continue;
             }
@@ -170,12 +165,12 @@ public class TransactionClassificationService {
         return suggestions;
     }
 
-    private List<Category> loadAllowedCategories(List<String> categoryIds) {
+    private List<Category> loadAllowedCategories(String userId, List<String> categoryIds) {
         if (categoryIds == null || categoryIds.isEmpty()) {
-            return categoryRepository.findAll();
+            return categoryRepository.findAllVisible(userId);
         }
 
-        var found = categoryRepository.findAllById(categoryIds);
+        var found = categoryRepository.findAllVisibleByIdIn(userId, categoryIds);
         if (found.size() != categoryIds.stream().distinct().count()) {
             throw new CategoryNotFound();
         }

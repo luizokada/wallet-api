@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.FORBIDDEN, reason = "You can only modify your own transactions")
 public class NotTransactionOwnerError extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+
     public NotTransactionOwnerError() {
         super("You can only modify your own transactions");
     }

@@ -1,9 +1,10 @@
 package wallet.api.domain.transaction.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,6 +24,7 @@ import wallet.api.infra.ai.GeminiClient;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -75,7 +77,7 @@ class TransactionClassificationServiceTest {
 
     @Test
     void shouldMapSuggestionsToCategoryIds() {
-        when(categoryRepository.findAll()).thenReturn(List.of(food, transport));
+        when(categoryRepository.findAllVisible("user-id")).thenReturn(List.of(food, transport));
         geminiAnswers("""
                 [{"index":0,"categoryName":"Comida","confidence":0.98},
                  {"index":1,"categoryName":"Transporte","confidence":0.95}]
@@ -96,7 +98,7 @@ class TransactionClassificationServiceTest {
 
     @Test
     void shouldLeaveItemUncategorizedBelowConfidenceThreshold() {
-        when(categoryRepository.findAll()).thenReturn(List.of(food));
+        when(categoryRepository.findAllVisible("user-id")).thenReturn(List.of(food));
         geminiAnswers("""
                 [{"index":0,"categoryName":"Comida","confidence":0.42}]
                 """);
@@ -113,7 +115,7 @@ class TransactionClassificationServiceTest {
 
     @Test
     void shouldIgnoreCategoryOutsideTheAllowedList() {
-        when(categoryRepository.findAll()).thenReturn(List.of(food));
+        when(categoryRepository.findAllVisible("user-id")).thenReturn(List.of(food));
         geminiAnswers("""
                 [{"index":0,"categoryName":"Pet","confidence":0.99}]
                 """);
@@ -129,7 +131,7 @@ class TransactionClassificationServiceTest {
 
     @Test
     void shouldSendOneRequestPerTypeAndNeverMixCategories() {
-        when(categoryRepository.findAll()).thenReturn(List.of(food, salary));
+        when(categoryRepository.findAllVisible("user-id")).thenReturn(List.of(food, salary));
         geminiAnswers("""
                 [{"index":0,"categoryName":"Comida","confidence":0.9}]
                 """);
@@ -146,7 +148,7 @@ class TransactionClassificationServiceTest {
 
     @Test
     void shouldAskOnlyOnceForRepeatedDescriptions() {
-        when(categoryRepository.findAll()).thenReturn(List.of(food));
+        when(categoryRepository.findAllVisible("user-id")).thenReturn(List.of(food));
         geminiAnswers("""
                 [{"index":0,"categoryName":"Comida","confidence":0.97}]
                 """);
@@ -165,8 +167,26 @@ class TransactionClassificationServiceTest {
     }
 
     @Test
+    void shouldSendOnlyVisibleCategoryNamesToTheProvider() {
+        when(categoryRepository.findAllVisible("user-id")).thenReturn(List.of(food));
+        geminiAnswers("""
+                [{"index":0,"categoryName":"Comida","confidence":0.9}]
+                """);
+
+        service.classify(user, new ClassifyTransactionsDTO(
+                List.of(item(0, "IFOOD *RESTAURANTE", TransactionType.EXPENSE)), null));
+
+        var prompt = ArgumentCaptor.forClass(String.class);
+        verify(geminiClient).generateJson(anyString(), prompt.capture(), any());
+
+        assertTrue(prompt.getValue().contains("Comida"));
+        assertFalse(prompt.getValue().contains("Transporte"));
+        verify(categoryRepository, never()).findAll();
+    }
+
+    @Test
     void shouldRestrictToSelectedCategories() {
-        when(categoryRepository.findAllById(anyList())).thenReturn(List.of(transport));
+        when(categoryRepository.findAllVisibleByIdIn(anyString(), anyList())).thenReturn(List.of(transport));
         geminiAnswers("""
                 [{"index":0,"categoryName":"Transporte","confidence":0.9}]
                 """);
@@ -177,12 +197,12 @@ class TransactionClassificationServiceTest {
         var result = service.classify(user, payload);
 
         assertEquals(1, result.classified());
-        verify(categoryRepository, never()).findAll();
+        verify(categoryRepository, never()).findAllVisible(anyString());
     }
 
     @Test
     void shouldThrowWhenSelectedCategoryDoesNotExist() {
-        when(categoryRepository.findAllById(anyList())).thenReturn(List.of());
+        when(categoryRepository.findAllVisibleByIdIn(anyString(), anyList())).thenReturn(List.of());
 
         var payload = new ClassifyTransactionsDTO(
                 List.of(item(0, "UBER", TransactionType.EXPENSE)), List.of("missing"));
@@ -194,7 +214,7 @@ class TransactionClassificationServiceTest {
 
     @Test
     void shouldNotCallGeminiWhenNoCategoryMatchesTheType() {
-        when(categoryRepository.findAll()).thenReturn(List.of(salary));
+        when(categoryRepository.findAllVisible("user-id")).thenReturn(List.of(salary));
 
         var payload = new ClassifyTransactionsDTO(
                 List.of(item(0, "IFOOD", TransactionType.EXPENSE)), null);
@@ -207,7 +227,7 @@ class TransactionClassificationServiceTest {
 
     @Test
     void shouldSkipItemsWithoutDescription() {
-        when(categoryRepository.findAll()).thenReturn(List.of(food));
+        when(categoryRepository.findAllVisible("user-id")).thenReturn(List.of(food));
 
         var payload = new ClassifyTransactionsDTO(
                 List.of(item(0, "   ", TransactionType.EXPENSE)), null);
@@ -221,7 +241,7 @@ class TransactionClassificationServiceTest {
 
     @Test
     void shouldPropagateProviderFailure() {
-        when(categoryRepository.findAll()).thenReturn(List.of(food));
+        when(categoryRepository.findAllVisible("user-id")).thenReturn(List.of(food));
         when(geminiClient.generateJson(anyString(), anyString(), any()))
                 .thenThrow(new ClassificationFailedError());
 
@@ -244,12 +264,12 @@ class TransactionClassificationServiceTest {
 
         assertEquals(30, thrown.getRetryAfterSeconds());
         verify(geminiClient, never()).generateJson(anyString(), anyString(), any());
-        verify(categoryRepository, never()).findAll();
+        verify(categoryRepository, never()).findAllVisible(anyString());
     }
 
     @Test
     void shouldCheckRateLimitPerUser() {
-        when(categoryRepository.findAll()).thenReturn(List.of(food));
+        when(categoryRepository.findAllVisible("user-id")).thenReturn(List.of(food));
         geminiAnswers("""
                 [{"index":0,"categoryName":"Comida","confidence":0.9}]
                 """);
@@ -262,7 +282,7 @@ class TransactionClassificationServiceTest {
 
     @Test
     void shouldMatchCategoryNameIgnoringAccentAndCase() {
-        when(categoryRepository.findAll()).thenReturn(List.of(salary));
+        when(categoryRepository.findAllVisible("user-id")).thenReturn(List.of(salary));
         geminiAnswers("""
                 [{"index":0,"categoryName":"salario","confidence":0.99}]
                 """);

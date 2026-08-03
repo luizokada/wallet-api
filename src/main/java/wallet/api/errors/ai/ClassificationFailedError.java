@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.BAD_GATEWAY, reason = "Automatic classification provider failed")
 public class ClassificationFailedError extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+
     public ClassificationFailedError() {
         super("Automatic classification provider failed");
     }

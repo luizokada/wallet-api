@@ -1,14 +1,16 @@
 package wallet.api.contoller;
 
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import wallet.api.domain.category.dtos.CategoryToApiViewDTO;
@@ -17,6 +19,7 @@ import wallet.api.domain.transaction.dto.ClassifyTransactionsDTO;
 import wallet.api.domain.transaction.dto.CreateTransactionDTO;
 import wallet.api.domain.transaction.dto.ImportResultDTO;
 import wallet.api.domain.transaction.dto.ImportTransactionsDTO;
+import wallet.api.domain.transaction.dto.TransactionPageDTO;
 import wallet.api.domain.transaction.dto.TransactionToApiViewDTO;
 import wallet.api.domain.transaction.dto.UpdateTransactionDTO;
 import wallet.api.domain.transaction.service.TransactionClassificationService;
@@ -25,17 +28,16 @@ import wallet.api.domain.user.entity.User;
 
 @RestController
 @RequestMapping("transaction")
-@Tag(
-        name = "Transaction",
-        description = "Endpoints for managing transactions (incomes and expenses)"
-)
+@Validated
+@Tag(name = "Transaction", description = "Endpoints for managing transactions (incomes and expenses)")
 public class TransactionController {
 
     private final TransactionService transactionService;
 
     private final TransactionClassificationService transactionClassificationService;
 
-    public TransactionController(TransactionService transactionService, TransactionClassificationService transactionClassificationService) {
+    public TransactionController(TransactionService transactionService,
+            TransactionClassificationService transactionClassificationService) {
         this.transactionService = transactionService;
         this.transactionClassificationService = transactionClassificationService;
     }
@@ -45,7 +47,8 @@ public class TransactionController {
     @ApiResponse(responseCode = "201", description = "Transaction created")
     @ApiResponse(responseCode = "400", description = "Validation error or category type does not match transaction type")
     @ApiResponse(responseCode = "404", description = "User has no wallet or category not found")
-    public ResponseEntity<TransactionToApiViewDTO> createTransaction(@AuthenticationPrincipal User user, @RequestBody @Valid CreateTransactionDTO body, UriComponentsBuilder uriBuild) {
+    public ResponseEntity<TransactionToApiViewDTO> createTransaction(@AuthenticationPrincipal User user,
+            @RequestBody @Valid CreateTransactionDTO body, UriComponentsBuilder uriBuild) {
         var createdTransaction = this.transactionService.createTransaction(user, body);
 
         var uri = uriBuild.path("/transaction/{id}").buildAndExpand(createdTransaction.getId()).toUri();
@@ -66,7 +69,8 @@ public class TransactionController {
     @ApiResponse(responseCode = "201", description = "Batch imported")
     @ApiResponse(responseCode = "400", description = "Validation error or category type does not match transaction type")
     @ApiResponse(responseCode = "404", description = "User has no wallet or category not found")
-    public ResponseEntity<ImportResultDTO> importTransactions(@AuthenticationPrincipal User user, @RequestBody @Valid ImportTransactionsDTO body) {
+    public ResponseEntity<ImportResultDTO> importTransactions(@AuthenticationPrincipal User user,
+            @RequestBody @Valid ImportTransactionsDTO body) {
         var result = this.transactionService.importTransactions(user, body);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
@@ -80,7 +84,8 @@ public class TransactionController {
     @ApiResponse(responseCode = "429", description = "Rate limited, see the Retry-After header")
     @ApiResponse(responseCode = "502", description = "Classification provider failed")
     @ApiResponse(responseCode = "503", description = "Classification is not configured")
-    public ResponseEntity<ClassificationResultDTO> classifyTransactions(@AuthenticationPrincipal User user, @RequestBody @Valid ClassifyTransactionsDTO body) {
+    public ResponseEntity<ClassificationResultDTO> classifyTransactions(@AuthenticationPrincipal User user,
+            @RequestBody @Valid ClassifyTransactionsDTO body) {
         return ResponseEntity.ok(this.transactionClassificationService.classify(user, body));
     }
 
@@ -89,7 +94,8 @@ public class TransactionController {
     @ApiResponse(responseCode = "200", description = "Transaction updated")
     @ApiResponse(responseCode = "400", description = "Category type does not match transaction type")
     @ApiResponse(responseCode = "404", description = "Transaction or category not found")
-    public ResponseEntity<TransactionToApiViewDTO> updateTransaction(@AuthenticationPrincipal User user, @PathVariable String id, @RequestBody @Valid UpdateTransactionDTO payload) {
+    public ResponseEntity<TransactionToApiViewDTO> updateTransaction(@AuthenticationPrincipal User user,
+            @PathVariable String id, @RequestBody @Valid UpdateTransactionDTO payload) {
 
         var updatedTransaction = this.transactionService.updateTransaction(id, user, payload);
         CategoryToApiViewDTO categoryJson = null;
@@ -110,6 +116,18 @@ public class TransactionController {
         transactionService.deleteTransaction(id, user);
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping
+    @Operation(summary = "List transactions", description = "Lists the authenticated user's transactions, most recent first, paginated. The wallet is resolved from the authenticated user.")
+    @ApiResponse(responseCode = "200", description = "Page of transactions")
+    @ApiResponse(responseCode = "400", description = "page or size out of range")
+    @ApiResponse(responseCode = "404", description = "User has no wallet")
+    public ResponseEntity<TransactionPageDTO> listTransactions(
+            @AuthenticationPrincipal User user,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "50") @Min(1) @Max(200) int size) {
+        return ResponseEntity.ok(TransactionPageDTO.from(transactionService.listByUser(user, page, size)));
     }
 
     @GetMapping("/{id}")

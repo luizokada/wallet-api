@@ -9,8 +9,7 @@ import java.util.List;
 public record ImportTransactionsDTO(
         @NotEmpty
         @Size(max = 500, message = "a batch can have at most 500 transactions")
-        @Valid
-        List<ImportTransactionItemDTO> transactions,
+        List<@Valid ImportTransactionItemDTO> transactions,
 
         Boolean skipDuplicates
 ) {

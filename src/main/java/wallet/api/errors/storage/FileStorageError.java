@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.BAD_GATEWAY, reason = "Failed to store file")
 public class FileStorageError extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+
     public FileStorageError() {
         super("Failed to store file");
     }
